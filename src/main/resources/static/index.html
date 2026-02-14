@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoteSecure - Student Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            min-height: 700px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            z-index: 1;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: white;
+            color: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .hero-content p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .features {
+            margin-top: 40px;
+            z-index: 1;
+            position: relative;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Form Section */
+        .form-section {
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-container {
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            background: var(--light);
+            border-radius: 12px;
+            padding: 6px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-indicator {
+            position: absolute;
+            height: 3px;
+            background: var(--primary);
+            bottom: -2px;
+            left: 6px;
+            width: calc(50% - 12px);
+            transition: transform 0.3s ease;
+            border-radius: 3px;
+        }
+
+        /* Forms */
+        .form {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .required::after {
+            content: '*';
+            color: var(--danger);
+            margin-left: 4px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-input.error {
+            border-color: var(--danger);
+        }
+
+        .form-input.success {
+            border-color: var(--success);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            cursor: pointer;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-weak { background: var(--danger); }
+        .strength-medium { background: var(--warning); }
+        .strength-strong { background: var(--success); }
+
+        .strength-text {
+            font-size: 0.85rem;
+            margin-top: 4px;
+            color: var(--gray);
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .success-message {
+            color: var(--success);
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-message {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        .info-message i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+        }
+
+        .form-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .form-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .form-button:active {
+            transform: translateY(0);
+        }
+
+        .form-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Forgot Password Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            padding: 40px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .modal-header .icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: var(--dark);
+        }
+
+        .modal-body {
+            margin-bottom: 30px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .modal-button {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .modal-button.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .modal-button.secondary {
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .modal-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Success Message in Modal */
+        .success-state {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 2rem;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            max-width: 400px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            transform: translateX(0);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 5px solid var(--success);
+        }
+
+        .notification.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 5px solid var(--danger);
+        }
+
+        .notification.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 5px solid var(--warning);
+        }
+
+        .notification.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 5px solid var(--primary);
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+
+        .close-notification {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .close-notification:hover {
+            opacity: 1;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Password Validation Tooltip */
+        .validation-tooltip {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+            display: none;
+        }
+
+        .validation-tooltip.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .validation-rule {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .validation-rule.valid {
+            color: var(--success);
+        }
+
+        .validation-rule.invalid {
+            color: var(--gray);
+        }
+
+        .validation-rule i {
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+                max-width: 600px;
+            }
+
+            .hero-section {
+                padding: 40px 30px;
+            }
+
+            .form-section {
+                padding: 40px 30px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 16px;
+            }
+
+            .hero-section {
+                padding: 30px 20px;
+            }
+
+            .form-section {
+                padding: 30px 20px;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .notification {
+                left: 20px;
+                right: 20px;
+                max-width: none;
+            }
+
+            .modal {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-vote-yea"></i>
+            </div>
+            <span>VoteSecure</span>
+        </div>
+
+        <div class="hero-content">
+            <h1>Secure Your Vote, Shape Your Future</h1>
+            <p>Welcome to the digital voting platform of our university. Cast your vote securely and participate in shaping the future of our community.</p>
+
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <h4>Military-Grade Security</h4>
+                        <p>End-to-end encrypted voting with blockchain verification</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div>
+                        <h4>One Student, One Vote</h4>
+                        <p>Verified identity ensures fair and transparent elections</p>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div>
+                        <h4>Complete Audit Trail</h4>
+                        <p>Every vote is recorded and can be verified anonymously</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-section">
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Student Portal</h2>
+                <p>Activate your account or login to participate in elections</p>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab active" data-tab="login">Login</button>
+                <button class="tab" data-tab="activate">Activate Account</button>
+                <div class="tab-indicator" id="tabIndicator"></div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="form active">
+                <div class="info-message">
+                    <i class="fas fa-info-circle"></i>
+                    Use your student email and password to login
+                </div>
+
+                <div class="form-group">
+                    <label for="loginEmail" class="form-label required">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    <input type="email" id="loginEmail" class="form-input"
+                           placeholder="your.email@student.edu" required>
+                    <div class="error-message" id="loginEmailError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword" class="form-label required">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <div class="input-with-icon">
+                        <input type="password" id="loginPassword" class="form-input"
+                               placeholder="Enter your password" required>
+                        <span class="input-icon" id="toggleLoginPassword">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                    </div>
+                    <div class="error-message" id="loginPasswordError"></div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe">Remember me for 7 days</label>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="form-button" id="loginButton">
+                        <span>Sign In</span>
+                    </button>
+                </div>
+
+                <div class="form-footer">
+                    <p>
+                        Forgot your password?
+                        <a href="#" id="forgotPassword">Reset it here</a>
+                    </p>
+                    <p style="margin-top: 10px;">
+                        Haven't activated your account yet?
+                        <a href="#" onclick="switchTab('activate')">Activate now</a>
+                    </p>
+                </div>
+            </form>
+
+            <!-- Activation Form -->
+            <form id="activateForm" class="form">
+                <div class="info-message">
+                    <i class="fas fa-info-circle"></i>
+                    You'll find your Voter ID in the email sent by the administration
+                </div>
+
+                <div class="form-group">
+                    <label for="voterId" class="form-label required">
+                        <i class="fas fa-id-card"></i> Voter ID
+                    </label>
+                    <input type="text" id="voterId" class="form-input"
+                           placeholder="VSU24CS001A1" maxlength="12" required>
+                    <div class="success-message" id="voterIdFormatValid">
+                        <i class="fas fa-check-circle"></i> Valid Voter ID format
+                    </div>
+                    <div class="error-message" id="voterIdError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="activateEmail" class="form-label required">
+                        <i class="fas fa-envelope"></i> Student Email
+                    </label>
+                    <input type="email" id="activateEmail" class="form-input"
+                           placeholder="your.email@student.edu" required>
+                    <div class="error-message" id="activateEmailError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="activatePassword" class="form-label required">
+                        <i class="fas fa-lock"></i> Create Password
+                    </label>
+                    <div class="input-with-icon">
+                        <input type="password" id="activatePassword" class="form-input"
+                               placeholder="Create a strong password" required>
+                        <span class="input-icon" id="toggleActivatePassword">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                    </div>
+
+                    <div class="password-strength">
+                        <div class="strength-bar" id="passwordStrengthBar"></div>
+                    </div>
+                    <div class="strength-text" id="passwordStrengthText">
+                        Password strength: None
+                    </div>
+
+                    <!-- Password Validation Tooltip -->
+                    <div class="validation-tooltip" id="passwordValidation">
+                        <div class="validation-rule" id="ruleLength">
+                            <i class="fas fa-times"></i>
+                            At least 8 characters
+                        </div>
+                        <div class="validation-rule" id="ruleUppercase">
+                            <i class="fas fa-times"></i>
+                            Contains uppercase letter
+                        </div>
+                        <div class="validation-rule" id="ruleLowercase">
+                            <i class="fas fa-times"></i>
+                            Contains lowercase letter
+                        </div>
+                        <div class="validation-rule" id="ruleNumber">
+                            <i class="fas fa-times"></i>
+                            Contains number
+                        </div>
+                        <div class="validation-rule" id="ruleSpecial">
+                            <i class="fas fa-times"></i>
+                            Contains special character
+                        </div>
+                    </div>
+
+                    <div class="error-message" id="activatePasswordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label required">
+                        <i class="fas fa-lock"></i> Confirm Password
+                    </label>
+                    <div class="input-with-icon">
+                        <input type="password" id="confirmPassword" class="form-input"
+                               placeholder="Re-enter your password" required>
+                        <span class="input-icon" id="toggleConfirmPassword">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                    </div>
+                    <div class="success-message" id="passwordMatch">
+                        <i class="fas fa-check-circle"></i> Passwords match
+                    </div>
+                    <div class="error-message" id="confirmPasswordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="form-button" id="activateButton">
+                        <span>Activate Account</span>
+                    </button>
+                </div>
+
+                <div class="form-footer">
+                    <p>
+                        Already activated?
+                        <a href="#" onclick="switchTab('login')">Login here</a>
+                    </p>
+                    <p style="margin-top: 10px;">
+                        Need help with activation?
+                        <a href="#" id="activationHelp">Contact support</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal-overlay" id="forgotPasswordModal">
+    <div class="modal">
+        <div class="modal-header">
+            <div class="icon">
+                <i class="fas fa-key"></i>
+            </div>
+            <h3>Reset Your Password</h3>
+        </div>
+
+        <div class="modal-body" id="modalBody">
+            <!-- Step 1: Email Input -->
+            <div id="step1">
+                <p>Enter your email address and we'll send you instructions to reset your password.</p>
+
+                <div class="form-group" style="margin-top: 25px;">
+                    <label for="resetEmail" class="form-label required">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
+                    <input type="email" id="resetEmail" class="form-input"
+                           placeholder="Enter your email address">
+                    <div class="error-message" id="resetEmailError"></div>
+                    <div class="info-message" style="margin-top: 15px; font-size: 0.85rem;">
+                        <i class="fas fa-info-circle"></i>
+                        You can use any email address (not just student email) for password reset
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Success Message -->
+            <div id="step2" class="success-state" style="display: none;">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h3 style="margin-bottom: 10px; color: var(--success);">Email Sent!</h3>
+                <p>We've sent password reset instructions to:</p>
+                <p style="font-weight: 600; margin: 10px 0; color: var(--dark);" id="sentEmail"></p>
+                <p style="font-size: 0.9rem; color: var(--gray);">
+                    Please check your inbox (and spam folder) for the reset link.
+                    The link will expire in 1 hour.
+                </p>
+            </div>
+        </div>
+
+        <div class="modal-footer" id="modalFooter">
+            <!-- Step 1 Buttons -->
+            <div id="step1Buttons">
+                <button class="modal-button secondary" id="cancelReset">
+                    Cancel
+                </button>
+                <button class="modal-button primary" id="sendResetEmail">
+                    Send Reset Instructions
+                </button>
+            </div>
+
+            <!-- Step 2 Buttons -->
+            <div id="step2Buttons" style="display: none; width: 100%;">
+                <button class="modal-button primary" id="closeModal" style="width: 100%;">
+                    Return to Login
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Container -->
+<div id="notificationContainer"></div>
+
+<script>
+    // Global State
+    let currentTab = 'login';
+    let loginAttempts = 0;
+    const MAX_LOGIN_ATTEMPTS = 5;
+    const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+    // DOM Elements
+    const tabButtons = document.querySelectorAll('.tab');
+    const tabIndicator = document.getElementById('tabIndicator');
+    const forms = document.querySelectorAll('.form');
+
+    // Login Form Elements
+    const loginForm = document.getElementById('loginForm');
+    const loginEmail = document.getElementById('loginEmail');
+    const loginPassword = document.getElementById('loginPassword');
+    const loginButton = document.getElementById('loginButton');
+    const rememberMe = document.getElementById('rememberMe');
+
+    // Activation Form Elements
+    const activateForm = document.getElementById('activateForm');
+    const voterId = document.getElementById('voterId');
+    const activateEmail = document.getElementById('activateEmail');
+    const activatePassword = document.getElementById('activatePassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const activateButton = document.getElementById('activateButton');
+    const passwordValidation = document.getElementById('passwordValidation');
+
+    // Password strength elements
+    const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+    const passwordStrengthText = document.getElementById('passwordStrengthText');
+
+    // Forgot Password Modal Elements
+    const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    const resetEmail = document.getElementById('resetEmail');
+    const resetEmailError = document.getElementById('resetEmailError');
+    const sendResetEmailButton = document.getElementById('sendResetEmail');
+    const cancelResetButton = document.getElementById('cancelReset');
+    const closeModalButton = document.getElementById('closeModal');
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step1Buttons = document.getElementById('step1Buttons');
+    const step2Buttons = document.getElementById('step2Buttons');
+    const sentEmail = document.getElementById('sentEmail');
+
+    // Tab Switching
+    function switchTab(tabName) {
+        currentTab = tabName;
+
+        // Update active tab button
+        tabButtons.forEach(button => {
+            if (button.dataset.tab === tabName) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
+
+        // Move indicator
+        const activeButton = document.querySelector(`.tab[data-tab="${tabName}"]`);
+        const buttonWidth = activeButton.offsetWidth;
+        const buttonLeft = activeButton.offsetLeft;
+        tabIndicator.style.transform = `translateX(${buttonLeft}px)`;
+        tabIndicator.style.width = `${buttonWidth}px`;
+
+        // Show corresponding form
+        forms.forEach(form => {
+            if (form.id === `${tabName}Form`) {
+                form.classList.add('active');
+            } else {
+                form.classList.remove('active');
+            }
+        });
+
+        // Reset forms
+        resetFormErrors();
+
+        // Focus first input
+        setTimeout(() => {
+            if (tabName === 'login') {
+                loginEmail.focus();
+            } else {
+                voterId.focus();
+            }
+        }, 100);
+    }
+
+    // Initialize tab indicator position
+    window.addEventListener('load', () => {
+        switchTab('login');
+    });
+
+    // Tab click handlers
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            switchTab(button.dataset.tab);
+        });
+    });
+
+    // Password visibility toggle
+    function setupPasswordToggle(passwordInputId, toggleButtonId) {
+        const passwordInput = document.getElementById(passwordInputId);
+        const toggleButton = document.getElementById(toggleButtonId);
+
+        toggleButton.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            toggleButton.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+        });
+    }
+
+    // Setup password toggles
+    setupPasswordToggle('loginPassword', 'toggleLoginPassword');
+    setupPasswordToggle('activatePassword', 'toggleActivatePassword');
+    setupPasswordToggle('confirmPassword', 'toggleConfirmPassword');
+
+    // Password Strength Calculator
+    function calculatePasswordStrength(password) {
+        let score = 0;
+        const rules = {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /\d/.test(password),
+            special: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
+        };
+
+        // Calculate score
+        Object.values(rules).forEach(rule => {
+            if (rule) score += 20;
+        });
+
+        // Update UI
+        updatePasswordStrengthUI(score, rules);
+
+        return { score, rules };
+    }
+
+    function updatePasswordStrengthUI(score, rules) {
+        // Update strength bar
+        passwordStrengthBar.style.width = `${score}%`;
+
+        // Update color and text
+        let strength = 'None';
+        let colorClass = '';
+
+        if (score >= 80) {
+            strength = 'Strong';
+            colorClass = 'strength-strong';
+        } else if (score >= 60) {
+            strength = 'Medium';
+            colorClass = 'strength-medium';
+        } else if (score >= 20) {
+            strength = 'Weak';
+            colorClass = 'strength-weak';
+        }
+
+        passwordStrengthBar.className = `strength-bar ${colorClass}`;
+        passwordStrengthText.textContent = `Password strength: ${strength}`;
+        passwordStrengthText.style.color = getComputedStyle(document.documentElement)
+            .getPropertyValue(`--${colorClass.replace('strength-', '')}`);
+
+        // Update validation rules
+        updateValidationRules(rules);
+    }
+
+    function updateValidationRules(rules) {
+        const ruleElements = {
+            length: document.getElementById('ruleLength'),
+            uppercase: document.getElementById('ruleUppercase'),
+            lowercase: document.getElementById('ruleLowercase'),
+            number: document.getElementById('ruleNumber'),
+            special: document.getElementById('ruleSpecial')
+        };
+
+        Object.entries(rules).forEach(([rule, isValid]) => {
+            const element = ruleElements[rule];
+            if (element) {
+                element.classList.toggle('valid', isValid);
+                element.classList.toggle('invalid', !isValid);
+                element.querySelector('i').className = isValid ? 'fas fa-check' : 'fas fa-times';
+            }
+        });
+    }
+
+    // Password validation events
+    activatePassword.addEventListener('input', function() {
+        const password = this.value;
+
+        if (password.length > 0) {
+            passwordValidation.classList.add('show');
+            calculatePasswordStrength(password);
+
+            // Check password match
+            if (confirmPassword.value) {
+                validatePasswordMatch();
+            }
+        } else {
+            passwordValidation.classList.remove('show');
+            passwordStrengthBar.style.width = '0%';
+            passwordStrengthText.textContent = 'Password strength: None';
+        }
+    });
+
+    activatePassword.addEventListener('focus', function() {
+        if (this.value.length > 0) {
+            passwordValidation.classList.add('show');
+        }
+    });
+
+    activatePassword.addEventListener('blur', function() {
+        setTimeout(() => {
+            passwordValidation.classList.remove('show');
+        }, 200);
+    });
+
+    // Password match validation
+    function validatePasswordMatch() {
+        const password = activatePassword.value;
+        const confirm = confirmPassword.value;
+        const matchElement = document.getElementById('passwordMatch');
+        const errorElement = document.getElementById('confirmPasswordError');
+
+        if (confirm.length === 0) {
+            matchElement.style.display = 'none';
+            errorElement.textContent = '';
+            return false;
+        }
+
+        if (password === confirm && password.length > 0) {
+            matchElement.style.display = 'flex';
+            errorElement.textContent = '';
+            return true;
+        } else {
+            matchElement.style.display = 'none';
+            errorElement.textContent = 'Passwords do not match';
+            return false;
+        }
+    }
+
+    confirmPassword.addEventListener('input', validatePasswordMatch);
+
+    // Voter ID Validation
+    function validateVoterId(voterIdValue) {
+        // Pattern: INSTITUTE_CODE(3) + YEAR(2) + DEPT(2) + SEQ(3) + CHECKSUM(2)
+        const pattern = /^(VSU|UNI|COL)(\d{2})(CS|EN|BU|AR|SC|MD)(\d{3})([A-Z0-9]{2})$/;
+        const match = voterIdValue.match(pattern);
+
+        if (!match) {
+            return {
+                valid: false,
+                message: 'Invalid Voter ID format. Expected: VSU24CS001A1'
+            };
+        }
+
+        // Validate year (should be current or next year)
+        const year = parseInt(match[2]);
+        const currentYear = new Date().getFullYear() % 100;
+        if (year < currentYear || year > currentYear + 1) {
+            return {
+                valid: false,
+                message: 'Invalid year in Voter ID'
+            };
+        }
+
+        // Validate checksum (simplified example)
+        const base = match[1] + match[2] + match[3] + match[4];
+        const checksum = match[5];
+        const calculatedChecksum = calculateChecksum(base);
+
+        if (checksum !== calculatedChecksum) {
+            return {
+                valid: false,
+                message: 'Invalid Voter ID checksum'
+            };
+        }
+
+        return {
+            valid: true,
+            message: 'Valid Voter ID format'
+        };
+    }
+
+    function calculateChecksum(input) {
+        // Simple checksum calculation for demo
+        let sum = 0;
+        for (let i = 0; i < input.length; i++) {
+            sum += input.charCodeAt(i);
+        }
+        return String.fromCharCode(65 + (sum % 26)) + (sum % 10);
+    }
+
+    voterId.addEventListener('input', function() {
+        const value = this.value.toUpperCase();
+        this.value = value;
+
+        const formatValidElement = document.getElementById('voterIdFormatValid');
+        const errorElement = document.getElementById('voterIdError');
+
+        if (value.length === 0) {
+            formatValidElement.style.display = 'none';
+            errorElement.textContent = '';
+            return;
+        }
+
+        if (value.length === 12) {
+            const validation = validateVoterId(value);
+            if (validation.valid) {
+                formatValidElement.style.display = 'flex';
+                errorElement.textContent = '';
+            } else {
+                formatValidElement.style.display = 'none';
+                errorElement.textContent = validation.message;
+            }
+        } else {
+            formatValidElement.style.display = 'none';
+            if (value.length > 12) {
+                errorElement.textContent = 'Voter ID must be exactly 12 characters';
+            } else {
+                errorElement.textContent = '';
+            }
+        }
+    });
+
+    // Email Validation (less restrictive for password reset)
+    function validateEmailForReset(email) {
+        const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return pattern.test(email);
+    }
+
+    function validateStudentEmail(email) {
+        const pattern = /^[A-Za-z0-9+_.-]+@student\.edu$/;
+        return pattern.test(email);
+    }
+
+    // Form Validation
+    function validateLoginForm() {
+        let isValid = true;
+        resetFormErrors('login');
+
+        // Email validation
+        if (!loginEmail.value.trim()) {
+            showError('loginEmailError', 'Email is required');
+            loginEmail.classList.add('error');
+            isValid = false;
+        } else if (!validateStudentEmail(loginEmail.value)) {
+            showError('loginEmailError', 'Must be a valid student email (@student.edu)');
+            loginEmail.classList.add('error');
+            isValid = false;
+        } else {
+            loginEmail.classList.remove('error');
+        }
+
+        // Password validation
+        if (!loginPassword.value) {
+            showError('loginPasswordError', 'Password is required');
+            loginPassword.classList.add('error');
+            isValid = false;
+        } else {
+            loginPassword.classList.remove('error');
+        }
+
+        return isValid;
+    }
+
+    function validateActivationForm() {
+        let isValid = true;
+        resetFormErrors('activate');
+
+        // Voter ID validation
+        const voterIdValidation = validateVoterId(voterId.value);
+        if (!voterId.value) {
+            showError('voterIdError', 'Voter ID is required');
+            voterId.classList.add('error');
+            isValid = false;
+        } else if (!voterIdValidation.valid) {
+            showError('voterIdError', voterIdValidation.message);
+            voterId.classList.add('error');
+            isValid = false;
+        } else {
+            voterId.classList.remove('error');
+        }
+
+        // Email validation
+        if (!activateEmail.value.trim()) {
+            showError('activateEmailError', 'Email is required');
+            activateEmail.classList.add('error');
+            isValid = false;
+        } else if (!validateStudentEmail(activateEmail.value)) {
+            showError('activateEmailError', 'Must be a valid student email (@student.edu)');
+            activateEmail.classList.add('error');
+            isValid = false;
+        } else {
+            activateEmail.classList.remove('error');
+        }
+
+        // Password validation
+        const passwordStrength = calculatePasswordStrength(activatePassword.value);
+        if (!activatePassword.value) {
+            showError('activatePasswordError', 'Password is required');
+            activatePassword.classList.add('error');
+            isValid = false;
+        } else if (passwordStrength.score < 60) {
+            showError('activatePasswordError', 'Password is too weak. Please use a stronger password.');
+            activatePassword.classList.add('error');
+            isValid = false;
+        } else {
+            activatePassword.classList.remove('error');
+        }
+
+        // Confirm password validation
+        if (!validatePasswordMatch()) {
+            confirmPassword.classList.add('error');
+            isValid = false;
+        } else {
+            confirmPassword.classList.remove('error');
+        }
+
+        return isValid;
+    }
+
+    function validateResetEmailForm() {
+        resetEmailError.textContent = '';
+        resetEmail.classList.remove('error');
+
+        if (!resetEmail.value.trim()) {
+            resetEmailError.textContent = 'Email address is required';
+            resetEmail.classList.add('error');
+            return false;
+        }
+
+        if (!validateEmailForReset(resetEmail.value)) {
+            resetEmailError.textContent = 'Please enter a valid email address';
+            resetEmail.classList.add('error');
+            return false;
+        }
+
+        return true;
+    }
+
+    // Reset form errors
+    function resetFormErrors(formType = 'all') {
+        const errorElements = document.querySelectorAll('.error-message');
+        const successElements = document.querySelectorAll('.success-message');
+        const inputElements = document.querySelectorAll('.form-input');
+
+        if (formType === 'login' || formType === 'all') {
+            errorElements.forEach(el => {
+                if (el.id.includes('login') || formType === 'all') {
+                    el.textContent = '';
+                }
+            });
+
+            inputElements.forEach(el => {
+                if (el.id.includes('login') || formType === 'all') {
+                    el.classList.remove('error');
+                }
+            });
+        }
+
+        if (formType === 'activate' || formType === 'all') {
+            errorElements.forEach(el => {
+                if (el.id.includes('activate') || el.id.includes('voterId') ||
+                    el.id.includes('confirmPassword') || formType === 'all') {
+                    el.textContent = '';
+                }
+            });
+
+            successElements.forEach(el => {
+                if (el.id.includes('voterIdFormatValid') || el.id.includes('passwordMatch')) {
+                    el.style.display = 'none';
+                }
+            });
+
+            inputElements.forEach(el => {
+                if (el.id.includes('activate') || el.id === 'voterId' ||
+                    el.id === 'confirmPassword' || formType === 'all') {
+                    el.classList.remove('error');
+                }
+            });
+        }
+    }
+
+    function showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+        }
+    }
+
+    // Modal Functions
+    function openForgotPasswordModal() {
+        // Reset modal state
+        step1.style.display = 'block';
+        step2.style.display = 'none';
+        step1Buttons.style.display = 'flex';
+        step2Buttons.style.display = 'none';
+
+        // Clear previous input
+        resetEmail.value = '';
+        resetEmailError.textContent = '';
+        resetEmail.classList.remove('error');
+
+        // Show modal
+        forgotPasswordModal.classList.add('active');
+
+        // Focus email input
+        setTimeout(() => {
+            resetEmail.focus();
+        }, 300);
+    }
+
+    function closeForgotPasswordModal() {
+        forgotPasswordModal.classList.remove('active');
+    }
+
+    function setModalButtonLoading(button, isLoading) {
+        const originalText = button.textContent;
+        if (isLoading) {
+            button.disabled = true;
+            button.innerHTML = '<div class="spinner" style="border-top-color: white; display: inline-block;"></div> Sending...';
+        } else {
+            button.disabled = false;
+            button.textContent = originalText.replace('<div class="spinner" style="border-top-color: white; display: inline-block;"></div> Sending...', 'Send Reset Instructions');
+        }
+    }
+
+    // Forgot Password Event Listeners
+    document.getElementById('forgotPassword').addEventListener('click', (e) => {
+        e.preventDefault();
+        openForgotPasswordModal();
+    });
+
+    cancelResetButton.addEventListener('click', closeForgotPasswordModal);
+
+    closeModalButton.addEventListener('click', () => {
+        closeForgotPasswordModal();
+        // Optionally focus back to login email
+        loginEmail.focus();
+    });
+
+    // Close modal when clicking outside
+    forgotPasswordModal.addEventListener('click', (e) => {
+        if (e.target === forgotPasswordModal) {
+            closeForgotPasswordModal();
+        }
+    });
+
+    // Send Reset Email Handler
+    sendResetEmailButton.addEventListener('click', async () => {
+        if (!validateResetEmailForm()) {
+            return;
+        }
+
+        const email = resetEmail.value.trim();
+
+        // Show loading state
+        setModalButtonLoading(sendResetEmailButton, true);
+
+        // Simulate API call
+        try {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Show success state
+            sentEmail.textContent = email;
+            step1.style.display = 'none';
+            step2.style.display = 'block';
+            step1Buttons.style.display = 'none';
+            step2Buttons.style.display = 'block';
+
+            // Show notification
+            showNotification(`Password reset instructions sent to ${email}`, 'success');
+
+        } catch (error) {
+            resetEmailError.textContent = 'Failed to send reset email. Please try again.';
+            resetEmail.classList.add('error');
+            showNotification('Failed to send reset email. Please try again.', 'error');
+        } finally {
+            setModalButtonLoading(sendResetEmailButton, false);
+        }
+    });
+
+    // Allow Enter key in reset email field
+    resetEmail.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendResetEmailButton.click();
+        }
+    });
+
+    // Notification System
+    function showNotification(message, type = 'info', duration = 5000) {
+        const container = document.getElementById('notificationContainer');
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-exclamation-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+
+        notification.innerHTML = `
+            <div class="notification-icon">
+                <i class="fas ${icons[type]}"></i>
+            </div>
+            <div>${message}</div>
+            <button class="close-notification">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        container.appendChild(notification);
+
+        // Auto-remove after duration
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.transform = 'translateX(100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }, duration);
+
+        // Close button
+        notification.querySelector('.close-notification').addEventListener('click', () => {
+            notification.style.transform = 'translateX(100%)';
+            notification.style.opacity = '0';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        });
+    }
+
+    // Button Loading State
+    function setButtonLoading(button, isLoading) {
+        const span = button.querySelector('span');
+        if (isLoading) {
+            button.disabled = true;
+            span.innerHTML = '<div class="spinner"></div> Processing...';
+        } else {
+            button.disabled = false;
+            if (button.id === 'loginButton') {
+                span.textContent = 'Sign In';
+            } else {
+                span.textContent = 'Activate Account';
+            }
+        }
+    }
+
+    // Mock API Functions
+    async function mockLogin(email, password, rememberMe) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Check login attempts
+        loginAttempts++;
+
+        if (loginAttempts > MAX_LOGIN_ATTEMPTS) {
+            throw new Error(`Too many failed attempts. Account locked for ${LOCKOUT_DURATION/60000} minutes.`);
+        }
+
+        // Mock validation
+        if (email === 'demo@student.edu' && password === 'Demo@123') {
+            return {
+                success: true,
+                data: {
+                    token: 'mock-jwt-token-12345',
+                    student: {
+                        voterId: 'VSU24CS001A1',
+                        email: 'demo@student.edu',
+                        fullName: 'Demo Student',
+                        department: 'Computer Science'
+                    },
+                    expiresIn: rememberMe ? 604800 : 3600,
+                    tokenType: 'Bearer'
+                }
+            };
+        } else {
+            throw new Error('Invalid email or password');
+        }
+    }
+
+    async function mockActivate(voterId, email, password) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Mock validation
+        const voterIdValidation = validateVoterId(voterId);
+        if (!voterIdValidation.valid) {
+            throw new Error(voterIdValidation.message);
+        }
+
+        if (!validateStudentEmail(email)) {
+            throw new Error('Invalid student email');
+        }
+
+        const passwordStrength = calculatePasswordStrength(password);
+        if (passwordStrength.score < 60) {
+            throw new Error('Password is too weak');
+        }
+
+        // Mock success
+        return {
+            success: true,
+            data: {
+                token: 'mock-jwt-activation-token-12345',
+                student: {
+                    voterId: voterId,
+                    email: email,
+                    fullName: 'John Smith', // Would come from imported data
+                    department: 'Computer Science'
+                },
+                expiresIn: 3600,
+                tokenType: 'Bearer'
+            }
+        };
+    }
+
+    async function mockSendResetEmail(email) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Mock validation
+        if (!validateEmailForReset(email)) {
+            throw new Error('Invalid email address');
+        }
+
+        // Mock success
+        return {
+            success: true,
+            message: 'Password reset email sent successfully'
+        };
+    }
+
+    // Form Submission Handlers
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!validateLoginForm()) {
+            return;
+        }
+
+        setButtonLoading(loginButton, true);
+
+        try {
+            const response = await mockLogin(
+                loginEmail.value,
+                loginPassword.value,
+                rememberMe.checked
+            );
+
+            if (response.success) {
+                showNotification('Login successful! Redirecting to dashboard...', 'success');
+
+                // Store token (in real app, use secure storage)
+                localStorage.setItem('authToken', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.student));
+
+                if (rememberMe.checked) {
+                    localStorage.setItem('rememberMe', 'true');
+                }
+
+                // Reset login attempts on success
+                loginAttempts = 0;
+
+                // Redirect to dashboard (simulated)
+                setTimeout(() => {
+                    showNotification('Welcome to VoteSecure Dashboard!', 'success');
+                    // In real app: window.location.href = '/dashboard.html';
+                }, 1000);
+            }
+        } catch (error) {
+            showNotification(error.message, 'error');
+
+            // Show specific error messages
+            if (error.message.includes('Invalid email or password')) {
+                showError('loginEmailError', 'Invalid email or password');
+                showError('loginPasswordError', 'Invalid email or password');
+                loginEmail.classList.add('error');
+                loginPassword.classList.add('error');
+            } else if (error.message.includes('locked')) {
+                showNotification('Your account has been locked. Please try again later or contact support.', 'warning', 10000);
+            }
+        } finally {
+            setButtonLoading(loginButton, false);
+        }
+    });
+
+    activateForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!validateActivationForm()) {
+            return;
+        }
+
+        setButtonLoading(activateButton, true);
+
+        try {
+            const response = await mockActivate(
+                voterId.value,
+                activateEmail.value,
+                activatePassword.value
+            );
+
+            if (response.success) {
+                showNotification('Account activated successfully!', 'success');
+
+                // Store token
+                localStorage.setItem('authToken', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.student));
+
+                // Redirect to login with success message
+                setTimeout(() => {
+                    switchTab('login');
+                    loginEmail.value = activateEmail.value;
+                    showNotification('Please login with your new credentials', 'info');
+                }, 1500);
+            }
+        } catch (error) {
+            showNotification(`Activation failed: ${error.message}`, 'error');
+
+            // Show specific error messages
+            if (error.message.includes('Voter ID')) {
+                showError('voterIdError', error.message);
+                voterId.classList.add('error');
+            } else if (error.message.includes('email')) {
+                showError('activateEmailError', error.message);
+                activateEmail.classList.add('error');
+            } else if (error.message.includes('Password')) {
+                showError('activatePasswordError', error.message);
+                activatePassword.classList.add('error');
+            }
+        } finally {
+            setButtonLoading(activateButton, false);
+        }
+    });
+
+    // Activation Help Handler
+    document.getElementById('activationHelp').addEventListener('click', (e) => {
+        e.preventDefault();
+        showNotification('Please contact the administration office or email support@votesecure.edu', 'info');
+    });
+
+    // Demo Data Button (for testing)
+    function loadDemoData() {
+        if (currentTab === 'login') {
+            loginEmail.value = 'demo@student.edu';
+            loginPassword.value = 'Demo@123';
+            showNotification('Demo credentials loaded', 'info');
+        } else {
+            voterId.value = 'VSU24CS001A1';
+            activateEmail.value = 'demo@student.edu';
+            activatePassword.value = 'Demo@123';
+            confirmPassword.value = 'Demo@123';
+            calculatePasswordStrength('Demo@123');
+            validatePasswordMatch();
+            showNotification('Demo activation data loaded', 'info');
+        }
+    }
+
+    // Add demo button to page
+    const demoButton = document.createElement('button');
+    demoButton.innerHTML = '<i class="fas fa-flask"></i> Load Demo Data';
+    demoButton.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--secondary);
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 100;
+        transition: all 0.3s ease;
+    `;
+    demoButton.addEventListener('mouseenter', () => {
+        demoButton.style.transform = 'translateY(-2px)';
+        demoButton.style.boxShadow = '0 6px 20px rgba(124, 58, 237, 0.4)';
+    });
+    demoButton.addEventListener('mouseleave', () => {
+        demoButton.style.transform = 'translateY(0)';
+        demoButton.style.boxShadow = '0 4px 15px rgba(124, 58, 237, 0.3)';
+    });
+    demoButton.addEventListener('click', loadDemoData);
+    document.body.appendChild(demoButton);
+
+    // Auto-focus on form inputs
+    document.addEventListener('DOMContentLoaded', () => {
+        loginEmail.focus();
+
+        // Check for existing session
+        if (localStorage.getItem('authToken')) {
+            showNotification('You are already logged in. Redirecting...', 'info');
+            setTimeout(() => {
+                // In real app: window.location.href = '/dashboard.html';
+            }, 1000);
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Activation | Student Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #2d3436;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .token-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #495057;
+            border-left: 4px solid #2575fc;
+            word-break: break-all;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #2575fc;
+            box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.1);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #adb5bd;
+            cursor: pointer;
+        }
+
+        .password-strength {
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background 0.3s;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 117, 252, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-container {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .message-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #6c757d;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo">
+        <h1>Activate Account</h1>
+    </div>
+
+    <!-- Token Display -->
+    <div class="token-info">
+        <strong>Activation Token:</strong> <span id="token-display">Loading...</span>
+    </div>
+
+    <!-- Activation Form -->
+    <div id="activation-form">
+        <div class="form-group">
+            <label for="newPassword">New Password</label>
+            <div class="input-with-icon">
+                <input type="password" id="newPassword" placeholder="Enter new password"
+                       oninput="validatePassword()">
+                <span class="input-icon" onclick="togglePassword('newPassword')">👁️</span>
+            </div>
+            <div class="password-strength">
+                <div class="strength-bar" id="password-strength-bar"></div>
+            </div>
+            <div class="error-message" id="password-error">
+                Password must be at least 8 characters with uppercase, lowercase, number and special character
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <div class="input-with-icon">
+                <input type="password" id="confirmPassword" placeholder="Confirm new password"
+                       oninput="validatePassword()">
+                <span class="input-icon" onclick="togglePassword('confirmPassword')">👁️</span>
+            </div>
+            <div class="error-message" id="confirm-error">
+                Passwords do not match
+            </div>
+        </div>
+
+        <button id="activate-btn" onclick="activateAccount()" disabled>
+            Activate Account
+        </button>
+    </div>
+
+    <!-- Status Messages -->
+    <div id="success-message" class="status-container hidden">
+        <div class="message-icon success">✅</div>
+        <h2>Account Activated!</h2>
+        <p>Your account has been successfully activated.</p>
+        <p>You can now log in with your new password.</p>
+        <button onclick="redirectToLogin()" style="margin-top: 20px; max-width: 200px;">
+            Go to Login
+        </button>
+    </div>
+
+    <div id="error-message" class="status-container hidden">
+        <div class="message-icon error">❌</div>
+        <h2 id="error-title">Activation Failed</h2>
+        <p id="error-detail">An error occurred during activation.</p>
+        <button onclick="location.reload()" style="margin-top: 20px; max-width: 200px;">
+            Try Again
+        </button>
+    </div>
+
+    <footer>
+        <p>Student Portal Activation System</p>
+        <p>Backend running on port 8082</p>
+    </footer>
+</div>
+
+<script>
+    // Extract token from URL query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const tokenDisplay = document.getElementById('token-display');
+
+    if (token) {
+        tokenDisplay.textContent = token;
+        // Store token in a variable for later use
+        window.activationToken = token;
+    } else {
+        tokenDisplay.textContent = 'No token found in URL';
+        tokenDisplay.style.color = '#dc3545';
+        disableForm();
+    }
+
+    function disableForm() {
+        document.getElementById('activation-form').style.opacity = '0.5';
+        document.getElementById('activate-btn').disabled = true;
+    }
+
+    function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function validatePassword() {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const passwordError = document.getElementById('password-error');
+        const confirmError = document.getElementById('confirm-error');
+        const strengthBar = document.getElementById('password-strength-bar');
+        const activateBtn = document.getElementById('activate-btn');
+
+        let isValid = true;
+
+        // Password strength validation
+        const hasMinLength = newPassword.length >= 8;
+        const hasUpperCase = /[A-Z]/.test(newPassword);
+        const hasLowerCase = /[a-z]/.test(newPassword);
+        const hasNumbers = /\d/.test(newPassword);
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+
+        const strength = [hasMinLength, hasUpperCase, hasLowerCase, hasNumbers, hasSpecialChar]
+            .filter(Boolean).length;
+
+        // Update strength bar
+        if (strength === 0) {
+            strengthBar.style.width = '0%';
+            strengthBar.style.background = '#dc3545';
+        } else if (strength <= 2) {
+            strengthBar.style.width = '40%';
+            strengthBar.style.background = '#dc3545';
+        } else if (strength <= 4) {
+            strengthBar.style.width = '70%';
+            strengthBar.style.background = '#ffc107';
+        } else {
+            strengthBar.style.width = '100%';
+            strengthBar.style.background = '#28a745';
+        }
+
+        // Show/hide password error
+        if (newPassword && strength < 5) {
+            passwordError.style.display = 'block';
+            isValid = false;
+        } else {
+            passwordError.style.display = 'none';
+        }
+
+        // Confirm password validation
+        if (confirmPassword && newPassword !== confirmPassword) {
+            confirmError.style.display = 'block';
+            isValid = false;
+        } else {
+            confirmError.style.display = 'none';
+        }
+
+        // Enable button only if valid
+        activateBtn.disabled = !isValid || !token;
+        return isValid;
+    }
+
+    async function activateAccount() {
+        if (!validatePassword()) return;
+
+        const activateBtn = document.getElementById('activate-btn');
+        const originalText = activateBtn.innerHTML;
+
+        // Show loading state
+        activateBtn.disabled = true;
+        activateBtn.innerHTML = '<span class="loading-spinner"></span>Activating...';
+
+        try {
+            const response = await fetch('http://localhost:8082/api/v1/auth/activate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    token: window.activationToken,
+                    newPassword: document.getElementById('newPassword').value,
+                    confirmPassword: document.getElementById('confirmPassword').value
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Success
+                document.getElementById('activation-form').classList.add('hidden');
+                document.getElementById('success-message').classList.remove('hidden');
+            } else {
+                // API error
+                showError(data.message || 'Activation failed. Please try again.');
+            }
+        } catch (error) {
+            // Network error
+            showError('Cannot connect to the server. Make sure backend is running on port 8082.');
+        } finally {
+            // Reset button
+            activateBtn.innerHTML = originalText;
+            activateBtn.disabled = false;
+        }
+    }
+
+    function showError(message) {
+        document.getElementById('activation-form').classList.add('hidden');
+        document.getElementById('error-message').classList.remove('hidden');
+        document.getElementById('error-detail').textContent = message;
+    }
+
+    function redirectToLogin() {
+        // Redirect to your login page - update URL as needed
+        window.location.href = 'http://localhost:8082/login';
+    }
+
+    // Initial validation check
+    document.addEventListener('DOMContentLoaded', function() {
+        validatePassword();
+    });
+</script>
+</body>
+</html>

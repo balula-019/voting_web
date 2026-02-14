@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Voting System | Student Login</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<!-- Login Page -->
+<div id="login-page" class="page active">
+    <div class="container">
+        <header class="header">
+            <div class="university-logo">
+                <i class="fas fa-university"></i>
+                <h1>University Voting System</h1>
+            </div>
+            <p class="subtitle">Secure Student Election Portal</p>
+        </header>
+
+        <main class="main-content">
+            <div class="login-card card">
+                <h2><i class="fas fa-sign-in-alt"></i> Student Login</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="email" placeholder="student@university.edu" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reg-number">Registration Number</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-id-card"></i>
+                            <input type="text" id="reg-number" placeholder="U-2024-00123" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" placeholder="Enter your password" required>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Login to Dashboard
+                        </button>
+                    </div>
+
+                    <div class="form-message" id="login-message"></div>
+                </form>
+
+                <div class="login-info">
+                    <p><i class="fas fa-info-circle"></i> Use demo credentials: email: student@university.edu | reg: U-2024-00123 | password: any</p>
+                </div>
+            </div>
+
+            <div class="system-info">
+                <h3><i class="fas fa-vote-yea"></i> About the System</h3>
+                <ul>
+                    <li><i class="fas fa-check-circle"></i> Secure student authentication</li>
+                    <li><i class="fas fa-check-circle"></i> Real-time election status tracking</li>
+                    <li><i class="fas fa-check-circle"></i> One vote per student policy</li>
+                    <li><i class="fas fa-check-circle"></i> Transparent voting process</li>
+                </ul>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>© 2023 University Voting System. For authorized student use only.</p>
+        </footer>
+    </div>
+</div>
+
+<!-- Dashboard Page -->
+<div id="dashboard-page" class="page">
+    <div class="container">
+        <header class="header">
+            <div class="university-logo">
+                <i class="fas fa-university"></i>
+                <h1>University Voting System</h1>
+            </div>
+            <button id="logout-btn" class="btn btn-secondary">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-tachometer-alt"></i> Student Dashboard</h2>
+                <div class="election-badge" id="election-status-badge">
+                    <span id="election-status-text">PENDING</span>
+                </div>
+            </div>
+
+            <div class="dashboard-content">
+                <div class="student-info card">
+                    <h3><i class="fas fa-user-graduate"></i> Student Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value" id="student-name">Alex Johnson</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Registration Number</div>
+                            <div class="info-value" id="student-reg">U-2024-00123</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Faculty</div>
+                            <div class="info-value">Computer Science</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Year of Study</div>
+                            <div class="info-value">3rd Year</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-status card">
+                    <h3><i class="fas fa-user-check"></i> Account Status</h3>
+                    <div class="status-container">
+                        <div class="status-indicator">
+                            <div class="status-dot" id="account-status-dot"></div>
+                            <div class="status-text" id="account-status-text">INACTIVE</div>
+                        </div>
+                        <p class="status-message" id="account-status-message">
+                            Your account is inactive. Voting will be enabled only when an election is active.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="voting-section card">
+                    <h3><i class="fas fa-vote-yea"></i> Voting Section</h3>
+                    <div class="election-info">
+                        <div class="info-item">
+                            <div class="info-label">Election Type</div>
+                            <div class="info-value">Student Union President 2024</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Voting Period</div>
+                            <div class="info-value">Nov 15, 2024 - Nov 20, 2024</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Total Candidates</div>
+                            <div class="info-value">4</div>
+                        </div>
+                    </div>
+
+                    <div class="voting-controls">
+                        <div id="election-message" class="election-message">
+                            Election has not started yet.
+                        </div>
+                        <button id="vote-btn" class="btn btn-primary" disabled>
+                            <i class="fas fa-check-circle"></i> Vote Now
+                        </button>
+                    </div>
+                </div>
+
+                <div class="instructions card">
+                    <h3><i class="fas fa-info-circle"></i> Voting Instructions</h3>
+                    <ul>
+                        <li>You can only vote once per election.</li>
+                        <li>Your vote is anonymous and cannot be traced back to you.</li>
+                        <li>Once submitted, your vote cannot be changed.</li>
+                        <li>Voting is only available during active election periods.</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>© 2023 University Voting System. For authorized student use only.</p>
+        </footer>
+    </div>
+</div>
+
+<!-- Voting Page -->
+<div id="voting-page" class="page">
+    <div class="container">
+        <header class="header">
+            <div class="university-logo">
+                <i class="fas fa-university"></i>
+                <h1>University Voting System</h1>
+            </div>
+            <button id="back-to-dashboard" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </button>
+        </header>
+
+        <main class="main-content">
+            <div class="voting-header">
+                <h2><i class="fas fa-vote-yea"></i> Cast Your Vote</h2>
+                <p class="subtitle">Student Union President Election 2024</p>
+                <div class="voting-instructions">
+                    <p><i class="fas fa-exclamation-circle"></i> Please select ONE candidate only. Your vote is final and cannot be changed.</p>
+                </div>
+            </div>
+
+            <div class="candidates-list">
+                <!-- Candidate cards will be generated by JavaScript -->
+            </div>
+
+            <div class="voting-actions">
+                <div class="vote-confirmation">
+                    <p id="selected-candidate-text">No candidate selected yet.</p>
+                </div>
+                <button id="submit-vote-btn" class="btn btn-primary" disabled>
+                    <i class="fas fa-paper-plane"></i> Submit Vote
+                </button>
+                <button id="cancel-vote-btn" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>© 2023 University Voting System. For authorized student use only.</p>
+        </footer>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-exclamation-triangle"></i> Confirm Your Action</h3>
+            <button id="close-modal" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="modal-message">Are you sure you want to proceed to voting?</p>
+            <p class="modal-note">Once you proceed, your account will be activated for voting.</p>
+        </div>
+        <div class="modal-footer">
+            <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+            <button id="modal-confirm" class="btn btn-primary">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Message -->
+<div id="success-message" class="success-message">
+    <div class="success-content">
+        <i class="fas fa-check-circle"></i>
+        <h3>Vote Submitted Successfully!</h3>
+        <p>Thank you for participating in the election. Your vote has been recorded.</p>
+        <button id="success-ok" class="btn btn-primary">OK</button>
+    </div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>

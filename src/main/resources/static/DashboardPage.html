@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Voting Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4ade80;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray: #6c757d;
+            --card-bg: #ffffff;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            background-color: #f5f7ff;
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Authentication Page */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .auth-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .auth-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .auth-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn:disabled {
+            background-color: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-success:hover {
+            background-color: #22c55e;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        /* Dashboard Page */
+        .dashboard {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            font-size: 1.8rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .logout-btn {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px 0;
+        }
+
+        .welcome-section {
+            background-color: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .welcome-text h1 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .welcome-text p {
+            color: var(--gray);
+        }
+
+        .notification-badge {
+            background-color: var(--accent);
+            color: var(--dark);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .voting-controls {
+            background-color: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .timer {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timer i {
+            color: var(--warning);
+        }
+
+        .vote-status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-active {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        /* Candidates Section */
+        .candidates-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .candidates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .candidate-card {
+            background-color: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .candidate-card.selected {
+            border: 3px solid var(--primary);
+        }
+
+        .candidate-img {
+            height: 180px;
+            width: 100%;
+            object-fit: cover;
+            background-color: #e2e8f0;
+        }
+
+        .candidate-info {
+            padding: 20px;
+        }
+
+        .candidate-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+
+        .candidate-position {
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .candidate-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .status-online {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        .status-offline {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .vote-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .vote-btn.selected {
+            background-color: var(--success);
+        }
+
+        .vote-btn:disabled {
+            background-color: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .selected-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: var(--primary);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .submit-section {
+            background-color: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .submit-section h3 {
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .selected-summary {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .selected-candidate {
+            background-color: #f0f9ff;
+            border-radius: 10px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .selected-candidate i {
+            color: var(--primary);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .modal-icon {
+            font-size: 3rem;
+            color: var(--success);
+            margin-bottom: 20px;
+        }
+
+        .modal h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .modal p {
+            margin-bottom: 25px;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        .voter-id {
+            background-color: #f0f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 20px 0;
+            letter-spacing: 3px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .welcome-section {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .voting-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .candidates-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-card {
+                max-width: 100%;
+            }
+
+            .candidates-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Authentication Page -->
+<div class="auth-container" id="authPage">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1><i class="fas fa-vote-yea"></i> Student Voting Platform</h1>
+            <p>Please authenticate with your student credentials</p>
+        </div>
+        <div class="auth-body">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="studentEmail">Student Email</label>
+                    <input type="email" id="studentEmail" class="form-control" placeholder="john.doe@university.edu" required>
+                </div>
+                <div class="form-group">
+                    <label for="regNumber">Registration Number</label>
+                    <input type="text" id="regNumber" class="form-control" placeholder="STU2023001" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%;">Login to Dashboard</button>
+            </form>
+            <div class="demo-credentials" style="margin-top: 20px; padding: 15px; background-color: #f0f9ff; border-radius: 10px;">
+                <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 8px;"><strong>Demo Credentials:</strong></p>
+                <p style="font-size: 0.85rem; color: var(--gray);">Email: student@university.edu</p>
+                <p style="font-size: 0.85rem; color: var(--gray);">Reg No: STU2023001</p>
+                <p style="font-size: 0.85rem; color: var(--gray);">Password: any password will work</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Page -->
+<div class="dashboard" id="dashboard">
+    <header class="header">
+        <div class="container header-content">
+            <h2><i class="fas fa-vote-yea"></i> Student Voting Platform</h2>
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">JD</div>
+                <div>
+                    <div id="userName">John Doe</div>
+                    <div style="font-size: 0.85rem; opacity: 0.9;" id="userEmail">student@university.edu</div>
+                </div>
+                <button class="btn logout-btn" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <div class="welcome-text">
+                    <h1>Hi, <span id="displayName">John</span>!</h1>
+                    <p>Welcome to your student voting dashboard. You can vote for your preferred candidates in the upcoming student elections.</p>
+                </div>
+                <div class="notification-badge" id="voterIdBadge" style="display: none;">
+                    <i class="fas fa-id-card"></i>
+                    <span>Voter ID: <span id="voterIdValue">Not Assigned</span></span>
+                </div>
+            </div>
+
+            <!-- Voting Controls -->
+            <div class="voting-controls">
+                <div>
+                    <h3 style="margin-bottom: 10px; color: var(--dark);">Election Status</h3>
+                    <div class="timer">
+                        <i class="fas fa-clock"></i>
+                        <span id="countdown">00:00:00</span>
+                    </div>
+                </div>
+                <div class="vote-status">
+                    <div class="status-badge status-pending" id="voteStatus">
+                        <i class="fas fa-pause-circle"></i> Voting Not Started
+                    </div>
+                    <button class="btn" id="startVoteBtn">
+                        <i class="fas fa-play-circle"></i> Start Voting
+                    </button>
+                </div>
+            </div>
+
+            <!-- Candidates Section -->
+            <div class="candidates-section">
+                <h3 class="section-title">
+                    <i class="fas fa-users"></i> Student Leadership Candidates
+                </h3>
+                <div class="candidates-grid" id="candidatesGrid">
+                    <!-- Candidate cards will be generated here -->
+                </div>
+            </div>
+
+            <!-- Submit Section -->
+            <div class="submit-section">
+                <h3>Submit Your Votes</h3>
+                <div class="selected-summary" id="selectedSummary">
+                    <!-- Selected candidates will appear here -->
+                </div>
+                <button class="btn btn-success" id="submitVoteBtn" disabled>
+                    <i class="fas fa-paper-plane"></i> Submit Votes
+                </button>
+                <p style="margin-top: 15px; color: var(--gray); font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> You can only submit your votes after the voting period has started and you've selected candidates for each position.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 Student Voting Platform. All rights reserved.</p>
+            <p style="margin-top: 5px; font-size: 0.9rem; opacity: 0.8;">This is a student election simulation platform.</p>
+        </div>
+    </footer>
+</div>
+
+<!-- Voter ID Modal -->
+<div class="modal" id="voterIdModal">
+    <div class="modal-content">
+        <div class="modal-icon">
+            <i class="fas fa-id-card"></i>
+        </div>
+        <h3>Your Voter ID is Ready!</h3>
+        <p>You have been assigned a unique Voter ID for this election. Please keep this ID for your records.</p>
+        <div class="voter-id" id="modalVoterId">VOT-2023-001</div>
+        <p style="font-size: 0.9rem;">You can now vote for your preferred candidates. The voting period will start soon.</p>
+        <button class="btn" id="closeModalBtn" style="margin-top: 20px;">
+            <i class="fas fa-check-circle"></i> Continue to Voting
+        </button>
+    </div>
+</div>
+
+<!-- Vote Submitted Modal -->
+<div class="modal" id="voteSubmittedModal">
+    <div class="modal-content">
+        <div class="modal-icon" style="color: var(--success);">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>Votes Submitted Successfully!</h3>
+        <p>Your votes have been recorded successfully. Thank you for participating in the student elections.</p>
+        <p style="font-size: 0.9rem;">You will receive a confirmation email shortly with your voting details.</p>
+        <button class="btn" id="closeSuccessModalBtn" style="margin-top: 20px;">
+            <i class="fas fa-home"></i> Return to Dashboard
+        </button>
+    </div>
+</div>
+
+<script>
+    // Application state
+    const state = {
+        isAuthenticated: false,
+        currentUser: null,
+        votingActive: false,
+        voterId: null,
+        selectedCandidates: {},
+        votingEndTime: null,
+        timerInterval: null
+    };
+
+    // Sample candidates data (4 rows, 4 candidates per row)
+    const candidates = [
+        { id: 1, name: "Alex Johnson", position: "President", image: "https://randomuser.me/api/portraits/men/32.jpg", status: "online" },
+        { id: 2, name: "Maria Garcia", position: "President", image: "https://randomuser.me/api/portraits/women/44.jpg", status: "online" },
+        { id: 3, name: "David Chen", position: "Vice President", image: "https://randomuser.me/api/portraits/men/67.jpg", status: "offline" },
+        { id: 4, name: "Sarah Williams", position: "Vice President", image: "https://randomuser.me/api/portraits/women/68.jpg", status: "online" },
+        { id: 5, name: "Michael Brown", position: "Secretary", image: "https://randomuser.me/api/portraits/men/75.jpg", status: "online" },
+        { id: 6, name: "Emma Wilson", position: "Secretary", image: "https://randomuser.me/api/portraits/women/63.jpg", status: "online" },
+        { id: 7, name: "James Taylor", position: "Treasurer", image: "https://randomuser.me/api/portraits/men/81.jpg", status: "offline" },
+        { id: 8, name: "Olivia Martinez", position: "Treasurer", image: "https://randomuser.me/api/portraits/women/26.jpg", status: "online" },
+        { id: 9, name: "Robert Lee", position: "Events Coordinator", image: "https://randomuser.me/api/portraits/men/22.jpg", status: "online" },
+        { id: 10, name: "Sophia Clark", position: "Events Coordinator", image: "https://randomuser.me/api/portraits/women/33.jpg", status: "offline" },
+        { id: 11, name: "William Walker", position: "Academic Rep", image: "https://randomuser.me/api/portraits/men/45.jpg", status: "online" },
+        { id: 12, name: "Ava Hall", position: "Academic Rep", image: "https://randomuser.me/api/portraits/women/41.jpg", status: "online" },
+        { id: 13, name: "Thomas King", position: "Sports Captain", image: "https://randomuser.me/api/portraits/men/55.jpg", status: "online" },
+        { id: 14, name: "Isabella Scott", position: "Sports Captain", image: "https://randomuser.me/api/portraits/women/55.jpg", status: "offline" },
+        { id: 15, name: "Daniel Wright", position: "Cultural Secretary", image: "https://randomuser.me/api/portraits/men/65.jpg", status: "online" },
+        { id: 16, name: "Mia Adams", position: "Cultural Secretary", image: "https://randomuser.me/api/portraits/women/65.jpg", status: "online" }
+    ];
+
+    // DOM Elements
+    const authPage = document.getElementById('authPage');
+    const dashboard = document.getElementById('dashboard');
+    const loginForm = document.getElementById('loginForm');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const displayName = document.getElementById('displayName');
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+    const userAvatar = document.getElementById('userAvatar');
+    const startVoteBtn = document.getElementById('startVoteBtn');
+    const submitVoteBtn = document.getElementById('submitVoteBtn');
+    const candidatesGrid = document.getElementById('candidatesGrid');
+    const selectedSummary = document.getElementById('selectedSummary');
+    const voterIdBadge = document.getElementById('voterIdBadge');
+    const voterIdValue = document.getElementById('voterIdValue');
+    const countdown = document.getElementById('countdown');
+    const voteStatus = document.getElementById('voteStatus');
+    const voterIdModal = document.getElementById('voterIdModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalVoterId = document.getElementById('modalVoterId');
+    const voteSubmittedModal = document.getElementById('voteSubmittedModal');
+    const closeSuccessModalBtn = document.getElementById('closeSuccessModalBtn');
+
+    // Initialize the application
+    function initApp() {
+        // Check if user is already logged in (for demo purposes)
+        const savedUser = localStorage.getItem('studentVotingUser');
+        if (savedUser) {
+            const user = JSON.parse(savedUser);
+            loginUser(user);
+        }
+
+        // Generate candidate cards
+        renderCandidates();
+
+        // Set up event listeners
+        loginForm.addEventListener('submit', handleLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+        startVoteBtn.addEventListener('click', startVoting);
+        submitVoteBtn.addEventListener('click', submitVotes);
+        closeModalBtn.addEventListener('click', () => {
+            voterIdModal.style.display = 'none';
+        });
+        closeSuccessModalBtn.addEventListener('click', () => {
+            voteSubmittedModal.style.display = 'none';
+        });
+    }
+
+    // Handle login form submission
+    function handleLogin(e) {
+        e.preventDefault();
+
+        const email = document.getElementById('studentEmail').value;
+        const regNumber = document.getElementById('regNumber').value;
+        const password = document.getElementById('password').value;
+
+        // Basic validation
+        if (!email || !regNumber || !password) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        // For demo purposes, accept any credentials
+        // Extract name from email for display
+        const nameFromEmail = email.split('@')[0].split('.')[0];
+        const capitalizedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
+
+        const user = {
+            name: capitalizedName,
+            fullName: capitalizedName + ' ' + 'Doe', // For demo
+            email: email,
+            regNumber: regNumber,
+            initials: capitalizedName.charAt(0) + 'D'
+        };
+
+        // Save to localStorage for persistence
+        localStorage.setItem('studentVotingUser', JSON.stringify(user));
+
+        loginUser(user);
+    }
+
+    // Login user and show dashboard
+    function loginUser(user) {
+        state.currentUser = user;
+        state.isAuthenticated = true;
+
+        // Update UI with user info
+        displayName.textContent = user.name;
+        userName.textContent = user.fullName;
+        userEmail.textContent = user.email;
+        userAvatar.textContent = user.initials;
+
+        // Switch to dashboard view
+        authPage.style.display = 'none';
+        dashboard.style.display = 'flex';
+
+        // Generate a voter ID
+        generateVoterId();
+    }
+
+    // Generate a random voter ID
+    function generateVoterId() {
+        const randomId = 'VOT-' + Date.now().toString().substr(-6) + '-' + Math.floor(Math.random() * 1000);
+        state.voterId = randomId;
+
+        // Update UI
+        voterIdValue.textContent = randomId;
+        modalVoterId.textContent = randomId;
+
+        // Show voter ID badge
+        voterIdBadge.style.display = 'flex';
+
+        // Show voter ID modal
+        setTimeout(() => {
+            voterIdModal.style.display = 'flex';
+        }, 500);
+    }
+
+    // Handle logout
+    function handleLogout() {
+        state.isAuthenticated = false;
+        state.currentUser = null;
+        state.votingActive = false;
+        state.selectedCandidates = {};
+
+        // Clear localStorage
+        localStorage.removeItem('studentVotingUser');
+
+        // Reset voting timer
+        if (state.timerInterval) {
+            clearInterval(state.timerInterval);
+        }
+
+        // Reset form
+        loginForm.reset();
+
+        // Switch to auth view
+        dashboard.style.display = 'none';
+        authPage.style.display = 'flex';
+    }
+
+    // Render candidates in the grid
+    function renderCandidates() {
+        candidatesGrid.innerHTML = '';
+
+        candidates.forEach(candidate => {
+            const card = document.createElement('div');
+            card.className = 'candidate-card';
+            card.id = `candidate-${candidate.id}`;
+
+            const isSelected = state.selectedCandidates[candidate.position] === candidate.id;
+
+            card.innerHTML = `
+                ${isSelected ? '<div class="selected-indicator"><i class="fas fa-check"></i></div>' : ''}
+                <img src="${candidate.image}" alt="${candidate.name}" class="candidate-img">
+                <div class="candidate-info">
+                    <div class="candidate-name">${candidate.name}</div>
+                    <div class="candidate-position">${candidate.position}</div>
+                    <div class="candidate-status ${candidate.status === 'online' ? 'status-online' : 'status-offline'}">
+                        <i class="fas fa-circle"></i> ${candidate.status === 'online' ? 'Active' : 'Inactive'}
+                    </div>
+                    <button class="btn vote-btn ${isSelected ? 'selected' : ''}"
+                            data-id="${candidate.id}"
+                            data-position="${candidate.position}"
+                            ${!state.votingActive ? 'disabled' : ''}>
+                        ${isSelected ? '<i class="fas fa-check-circle"></i> Selected' : '<i class="fas fa-vote-yea"></i> Vote Now'}
+                    </button>
+                </div>
+            `;
+
+            candidatesGrid.appendChild(card);
+
+            // Add click event to vote button
+            const voteBtn = card.querySelector('.vote-btn');
+            voteBtn.addEventListener('click', () => selectCandidate(candidate.id, candidate.position, candidate.name));
+        });
+
+        updateSelectedSummary();
+    }
+
+    // Select a candidate for a position
+    function selectCandidate(candidateId, position, candidateName) {
+        if (!state.votingActive) return;
+
+        // Check if already selected for this position
+        if (state.selectedCandidates[position] === candidateId) {
+            // Deselect
+            delete state.selectedCandidates[position];
+        } else {
+            // Select new candidate for this position
+            state.selectedCandidates[position] = candidateId;
+
+            // Show visual feedback
+            const button = document.querySelector(`.vote-btn[data-id="${candidateId}"]`);
+            button.innerHTML = '<i class="fas fa-check-circle"></i> Selected';
+            button.classList.add('selected');
+
+            // Update other candidates for same position
+            document.querySelectorAll(`.vote-btn[data-position="${position}"]`).forEach(btn => {
+                if (btn.dataset.id !== candidateId.toString()) {
+                    btn.innerHTML = '<i class="fas fa-vote-yea"></i> Vote Now';
+                    btn.classList.remove('selected');
+                }
+            });
+
+            // Update card indicators
+            document.querySelectorAll('.candidate-card').forEach(card => {
+                const cardId = card.id.replace('candidate-', '');
+                const indicator = card.querySelector('.selected-indicator');
+
+                if (cardId === candidateId.toString()) {
+                    if (!indicator) {
+                        const newIndicator = document.createElement('div');
+                        newIndicator.className = 'selected-indicator';
+                        newIndicator.innerHTML = '<i class="fas fa-check"></i>';
+                        card.prepend(newIndicator);
+                    }
+                } else if (state.selectedCandidates[position] !== parseInt(cardId)) {
+                    if (indicator) {
+                        indicator.remove();
+                    }
+                }
+            });
+
+            // Show toast notification
+            showToast(`You selected ${candidateName} for ${position}`);
+        }
+
+        updateSelectedSummary();
+        checkSubmitEligibility();
+    }
+
+    // Update the selected candidates summary
+    function updateSelectedSummary() {
+        selectedSummary.innerHTML = '';
+
+        if (Object.keys(state.selectedCandidates).length === 0) {
+            selectedSummary.innerHTML = '<p style="color: var(--gray);">No candidates selected yet</p>';
+            return;
+        }
+
+        // Group candidates by position
+        const positions = {};
+        candidates.forEach(candidate => {
+            if (state.selectedCandidates[candidate.position] === candidate.id) {
+                positions[candidate.position] = candidate.name;
+            }
+        });
+
+        // Create summary items
+        for (const [position, name] of Object.entries(positions)) {
+            const item = document.createElement('div');
+            item.className = 'selected-candidate';
+            item.innerHTML = `
+                <i class="fas fa-user-check"></i>
+                <span>${position}: <strong>${name}</strong></span>
+            `;
+            selectedSummary.appendChild(item);
+        }
+    }
+
+    // Check if user is eligible to submit votes
+    function checkSubmitEligibility() {
+        // Count unique positions selected
+        const selectedPositions = new Set(Object.keys(state.selectedCandidates));
+
+        // Enable submit button if voting is active and at least one position is selected
+        if (state.votingActive && selectedPositions.size > 0) {
+            submitVoteBtn.disabled = false;
+        } else {
+            submitVoteBtn.disabled = true;
+        }
+    }
+
+    // Start the voting process
+    function startVoting() {
+        state.votingActive = true;
+
+        // Update UI
+        startVoteBtn.disabled = true;
+        startVoteBtn.innerHTML = '<i class="fas fa-play-circle"></i> Voting Active';
+        voteStatus.className = 'status-badge status-active';
+        voteStatus.innerHTML = '<i class="fas fa-play-circle"></i> Voting Active';
+
+        // Enable vote buttons
+        document.querySelectorAll('.vote-btn').forEach(btn => {
+            btn.disabled = false;
+        });
+
+        // Set voting end time (30 minutes from now)
+        state.votingEndTime = new Date().getTime() + 30 * 60 * 1000;
+
+        // Start countdown timer
+        updateCountdown();
+        state.timerInterval = setInterval(updateCountdown, 1000);
+
+        // Show notification
+        showToast('Voting is now active! You can select your candidates.');
+    }
+
+    // Update the countdown timer
+    function updateCountdown() {
+        if (!state.votingEndTime) return;
+
+        const now = new Date().getTime();
+        const distance = state.votingEndTime - now;
+
+        if (distance < 0) {
+            // Voting time is over
+            clearInterval(state.timerInterval);
+            countdown.textContent = '00:00:00';
+            endVoting();
+            return;
+        }
+
+        // Calculate hours, minutes, seconds
+        const hours = Math.floor(distance / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        // Format and display
+        countdown.textContent =
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // End voting when time is up
+    function endVoting() {
+        state.votingActive = false;
+
+        // Update UI
+        voteStatus.className = 'status-badge status-pending';
+        voteStatus.innerHTML = '<i class="fas fa-pause-circle"></i> Voting Ended';
+
+        // Disable vote buttons
+        document.querySelectorAll('.vote-btn').forEach(btn => {
+            btn.disabled = true;
+        });
+
+        // Disable submit button
+        submitVoteBtn.disabled = true;
+
+        showToast('Voting period has ended. Thank you for participating!');
+    }
+
+    // Submit votes
+    function submitVotes() {
+        if (!state.votingActive || Object.keys(state.selectedCandidates).length === 0) {
+            alert('You cannot submit votes at this time.');
+            return;
+        }
+
+        // In a real app, this would send data to a server
+        console.log('Submitting votes:', {
+            voterId: state.voterId,
+            user: state.currentUser,
+            votes: state.selectedCandidates,
+            timestamp: new Date().toISOString()
+        });
+
+        // Show success modal
+        voteSubmittedModal.style.display = 'flex';
+
+        // Reset selections for next vote (if allowed)
+        state.selectedCandidates = {};
+        renderCandidates();
+
+        // Disable submit button
+        submitVoteBtn.disabled = true;
+
+        // End voting after submission (for demo)
+        setTimeout(() => {
+            endVoting();
+        }, 1000);
+    }
+
+    // Show a toast notification
+    function showToast(message) {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--dark);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+        `;
+
+        toast.innerHTML = `
+            <i class="fas fa-info-circle"></i>
+            <span>${message}</span>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+
+    // Add CSS for toast animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(10px); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Initialize the app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
