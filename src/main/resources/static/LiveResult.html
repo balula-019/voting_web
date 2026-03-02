@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Results · Student Council Election</title>
+    <style>
+        /* Same theme variables and base styles as voting page */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        :root {
+            --bg-primary: #f8fafd;
+            --bg-card: #ffffff;
+            --bg-surface: #f1f4f9;
+            --bg-surface-hover: #e9eef4;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --accent-primary: #2563eb;
+            --accent-secondary: #3b82f6;
+            --accent-glow: rgba(37, 99, 235, 0.15);
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 40px -12px rgba(0, 20, 40, 0.2);
+            --success: #059669;
+            --success-bg: #ecfdf5;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0b1120;
+            --bg-card: #1a2332;
+            --bg-surface: #232e41;
+            --bg-surface-hover: #2d3a4f;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #3b82f6;
+            --accent-glow: rgba(96, 165, 250, 0.2);
+            --border-light: #334155;
+            --border-medium: #475569;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+            --success: #34d399;
+            --success-bg: #1e3a2f;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
+        }
+
+        .theme-toggle button {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 40px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(8px);
+            transition: all 0.2s;
+        }
+
+        .theme-toggle button:hover {
+            background: var(--bg-surface);
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .results-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: 40px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            padding: 2.5rem 2.5rem 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(100px, -100px);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+            position: relative;
+        }
+
+        .header .subtitle {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+
+        .content {
+            padding: 2.5rem;
+        }
+
+        .back-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            border-radius: 60px;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: var(--bg-surface-hover);
+            border-color: var(--accent-primary);
+            transform: translateX(-4px);
+        }
+
+        .position-results {
+            background: var(--bg-surface);
+            border-radius: 28px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .position-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--accent-primary);
+            border-bottom: 2px solid var(--border-light);
+            padding-bottom: 0.75rem;
+        }
+
+        .candidate-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .candidate-info {
+            flex: 0 0 180px;
+        }
+
+        .candidate-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .vote-count {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+        }
+
+        .bar-container {
+            flex: 1;
+            height: 40px;
+            background: var(--bg-card);
+            border-radius: 60px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-light);
+        }
+
+        .bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: width 0.5s ease;
+            white-space: nowrap;
+        }
+
+        .percentage {
+            min-width: 60px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .last-updated {
+            text-align: center;
+            margin-top: 2rem;
+            color: var(--text-tertiary);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 640px) {
+            .content { padding: 1.5rem; }
+            .header { padding: 1.5rem; }
+            .candidate-row { flex-wrap: wrap; }
+            .candidate-info { flex: 0 0 100%; }
+            .bar { font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+<div class="theme-toggle">
+    <button id="themeToggleBtn">
+        <span>🌙</span>
+        <span>Dark Mode</span>
+    </button>
+</div>
+
+<div class="results-container">
+    <div class="header">
+        <h1>📊 Live Election Results</h1>
+        <div class="subtitle">Student Council 2025 · Real‑time updates</div>
+    </div>
+
+    <div class="content" id="resultsContent">
+        <a href="index.html" class="back-btn">
+            <span>←</span> Back to Voting
+        </a>
+
+        <div id="resultsPlaceholder">
+            <!-- Results will be injected here -->
+        </div>
+
+        <div class="last-updated" id="lastUpdated">
+            Last updated: just now
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Theme management (same as voting page)
+        const themeToggle = document.getElementById('themeToggleBtn');
+        const body = document.body;
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', savedTheme);
+        updateThemeButton(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButton(newTheme);
+        });
+
+        function updateThemeButton(theme) {
+            const btn = themeToggle.querySelector('span:first-child');
+            const text = themeToggle.querySelector('span:last-child');
+            if (theme === 'dark') {
+                btn.textContent = '☀️';
+                text.textContent = 'Light Mode';
+            } else {
+                btn.textContent = '🌙';
+                text.textContent = 'Dark Mode';
+            }
+        }
+
+        // Candidate data (same as voting page)
+        const positions = [
+            {
+                id: 'president',
+                title: 'President',
+                candidates: [
+                    { id: 'p1', name: 'Alex Rivera' },
+                    { id: 'p2', name: 'Jordan Lee' },
+                    { id: 'p3', name: 'Samira Chen' }
+                ]
+            },
+            {
+                id: 'vp',
+                title: 'Vice President',
+                candidates: [
+                    { id: 'vp1', name: 'Taylor Smith' },
+                    { id: 'vp2', name: 'Morgan Kim' },
+                    { id: 'vp3', name: 'Casey Williams' }
+                ]
+            },
+            {
+                id: 'treasurer',
+                title: 'Treasurer',
+                candidates: [
+                    { id: 't1', name: 'Jamie Brown' },
+                    { id: 't2', name: 'Pat Martinez' }
+                ]
+            }
+        ];
+
+        // Generate random vote counts (for demo)
+        function generateVoteData() {
+            const data = {};
+            positions.forEach(pos => {
+                const total = Math.floor(Math.random() * 200) + 100; // 100–300 votes per position
+                const votes = [];
+                let sum = 0;
+                pos.candidates.forEach((cand, index) => {
+                    if (index === pos.candidates.length - 1) {
+                        votes.push(total - sum);
+                    } else {
+                        const v = Math.floor(Math.random() * (total - sum) * 0.7) + 10;
+                        votes.push(v);
+                        sum += v;
+                    }
+                });
+                data[pos.id] = votes;
+            });
+            return data;
+        }
+
+        function renderResults() {
+            const voteData = generateVoteData();
+            const container = document.getElementById('resultsPlaceholder');
+            let html = '';
+
+            positions.forEach((pos, posIndex) => {
+                const votes = voteData[pos.id];
+                const total = votes.reduce((a, b) => a + b, 0);
+
+                html += `<div class="position-results">`;
+                html += `<div class="position-title">${pos.title}</div>`;
+
+                pos.candidates.forEach((cand, idx) => {
+                    const count = votes[idx];
+                    const percentage = total > 0 ? ((count / total) * 100).toFixed(1) : 0;
+                    const barWidth = percentage + '%';
+
+                    html += `
+                        <div class="candidate-row">
+                            <div class="candidate-info">
+                                <div class="candidate-name">${cand.name}</div>
+                                <div class="vote-count">${count} votes</div>
+                            </div>
+                            <div class="bar-container">
+                                <div class="bar" style="width: ${barWidth};">${percentage}%</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div>`;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('lastUpdated').innerHTML = `Last updated: ${new Date().toLocaleTimeString()}`;
+        }
+
+        // Initial render
+        renderResults();
+
+        // Simulate live updates every 10 seconds
+        setInterval(() => {
+            renderResults();
+        }, 10000);
+    })();
+</script>
+</body>
+</html>

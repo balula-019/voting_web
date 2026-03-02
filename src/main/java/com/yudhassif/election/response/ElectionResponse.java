@@ -1,6 +1,6 @@
 package com.yudhassif.election.response;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record ElectionResponse(
         Long id,
@@ -8,8 +8,8 @@ public record ElectionResponse(
         String status,              //
         String description,
         String academicYear,        //
-        LocalDateTime votingStartTime,
+        Instant votingStartTime,
         String semester,
-        LocalDateTime votingEndTime
+        Instant votingEndTime
 )
 {}

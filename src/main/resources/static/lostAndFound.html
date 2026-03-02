@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>ReConnect · smart lost & found · Africa</title>
+    <!-- Font Awesome 6 (free) & Google Fonts (Inter) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        /* ---------- CSS variables for light / dark theme ---------- */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+          background: #eef2f6;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          transition: background 0.3s;
+        }
+
+        /* light theme (default) */
+        :root {
+          --bg-page: #f4f7fb;
+          --bg-app: #ffffff;
+          --bg-card: #f9fcff;
+          --border-light: #e6ecf3;
+          --text-primary: #1A2E45;
+          --text-secondary: #3a546d;
+          --text-tertiary: #6f7d91;
+          --accent: #2B7A78;
+          --accent-soft: #2b7a7815;
+          --accent-dark: #1e5f5c;
+          --chip-bg: #ffffff;
+          --nav-inactive: #7d8b9f;
+          --input-bg: #f9fcff;
+          --input-border: #dae2ed;
+          --shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,40,40,0.05);
+          --shadow-hover: 0 12px 28px rgba(0,80,80,0.08);
+          --status-open-bg: #e7edf5;
+          --status-open-text: #2b4f6e;
+          --status-claimed-bg: #fdf6e3;
+          --status-claimed-text: #b85b14;
+          --status-closed-bg: #e1f0e8;
+          --status-closed-text: #1f7840;
+        }
+
+        /* dark theme class */
+        .dark-theme {
+          --bg-page: #0f1a24;
+          --bg-app: #1e2a36;
+          --bg-card: #263340;
+          --border-light: #354557;
+          --text-primary: #edf2f9;
+          --text-secondary: #b6c8da;
+          --text-tertiary: #9aabbf;
+          --accent: #3fb4b0;
+          --accent-soft: #3fb4b020;
+          --accent-dark: #2e8f8b;
+          --chip-bg: #2e3d4e;
+          --nav-inactive: #8f9fb2;
+          --input-bg: #1f2c3a;
+          --input-border: #354557;
+          --shadow: 0 8px 20px rgba(0,0,0,0.4);
+          --shadow-hover: 0 12px 28px rgba(0,180,180,0.15);
+          --status-open-bg: #2e4053;
+          --status-open-text: #b6d0e8;
+          --status-claimed-bg: #4d3a28;
+          --status-claimed-text: #f5b17b;
+          --status-closed-bg: #1f423b;
+          --status-closed-text: #9cd4b5;
+        }
+
+        #app {
+          width: 100%;
+          max-width: 420px;
+          background: var(--bg-app);
+          border-radius: 36px 36px 0 0;
+          box-shadow: var(--shadow);
+          height: 700px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          position: relative;
+          transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        /* ----- top bar with theme toggle ----- */
+        .top-bar {
+          padding: 20px 20px 12px;
+          background: var(--bg-app);
+          border-bottom: 1px solid var(--border-light);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .logo {
+          font-weight: 700;
+          font-size: 1.6rem;
+          letter-spacing: -0.5px;
+          color: var(--text-primary);
+        }
+        .logo span {
+          color: var(--accent);
+        }
+        .top-actions {
+          display: flex;
+          gap: 10px;
+          align-items: center;
+        }
+        .theme-toggle {
+          background: var(--bg-card);
+          border: 1px solid var(--border-light);
+          border-radius: 40px;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--accent);
+          cursor: pointer;
+          transition: 0.2s;
+          font-size: 1.2rem;
+        }
+        .user-badge {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: var(--bg-card);
+          padding: 6px 14px 6px 12px;
+          border-radius: 40px;
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: var(--text-primary);
+          border: 1px solid var(--border-light);
+        }
+        .verified {
+          color: var(--accent);
+        }
+
+        /* main content area */
+        .main-content {
+          flex: 1;
+          overflow-y: auto;
+          padding: 16px 20px;
+          background: var(--bg-app);
+          transition: background 0.3s;
+          scrollbar-width: thin;
+        }
+
+        /* bottom navigation */
+        .bottom-nav {
+          background: var(--bg-app);
+          border-top: 1px solid var(--border-light);
+          display: flex;
+          justify-content: space-around;
+          padding: 8px 16px 12px;
+          backdrop-filter: blur(10px);
+        }
+        .nav-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          color: var(--nav-inactive);
+          font-size: 0.7rem;
+          transition: 0.2s;
+          cursor: pointer;
+          font-weight: 500;
+        }
+        .nav-item i {
+          font-size: 1.5rem;
+          margin-bottom: 2px;
+        }
+        .nav-item.active {
+          color: var(--accent);
+        }
+
+        /* buttons & forms */
+        button, .btn {
+          background: var(--accent);
+          border: none;
+          color: white;
+          padding: 12px 20px;
+          border-radius: 40px;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: 0.2s;
+          border: 1px solid transparent;
+          box-shadow: 0 4px 10px rgba(43,122,120,0.2);
+        }
+        button.secondary {
+          background: transparent;
+          color: var(--text-primary);
+          border: 1px solid var(--border-light);
+          box-shadow: none;
+        }
+        button.small {
+          padding: 8px 16px;
+          font-size: 0.9rem;
+        }
+        button:active { transform: scale(0.97); }
+        input, textarea, select {
+          width: 100%;
+          padding: 14px 18px;
+          border: 1px solid var(--input-border);
+          border-radius: 30px;
+          font-size: 1rem;
+          background: var(--input-bg);
+          margin-bottom: 16px;
+          color: var(--text-primary);
+          transition: 0.2s;
+        }
+        input:focus, textarea:focus, select:focus {
+          outline: none;
+          border-color: var(--accent);
+          box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        label {
+          font-weight: 600;
+          font-size: 0.85rem;
+          margin-bottom: 6px;
+          display: block;
+          color: var(--text-secondary);
+          letter-spacing: 0.3px;
+        }
+        .card {
+          background: var(--bg-card);
+          border-radius: 28px;
+          padding: 18px;
+          margin-bottom: 16px;
+          border: 1px solid var(--border-light);
+          box-shadow: var(--shadow);
+          transition: transform 0.15s, box-shadow 0.2s;
+          cursor: pointer;
+        }
+        .card:hover {
+          box-shadow: var(--shadow-hover);
+          transform: translateY(-2px);
+        }
+        .flex-row {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+        .chip {
+          background: var(--chip-bg);
+          border-radius: 50px;
+          padding: 6px 16px;
+          border: 1px solid var(--accent);
+          color: var(--accent);
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+        .badge {
+          background: var(--accent);
+          color: white;
+          border-radius: 20px;
+          padding: 4px 12px;
+          font-size: 0.7rem;
+        }
+        .status {
+          font-size: 0.75rem;
+          padding: 4px 10px;
+          border-radius: 40px;
+          font-weight: 600;
+          display: inline-block;
+        }
+        .status.open { background: var(--status-open-bg); color: var(--status-open-text); }
+        .status.claimed { background: var(--status-claimed-bg); color: var(--status-claimed-text); }
+        .status.closed { background: var(--status-closed-bg); color: var(--status-closed-text); }
+
+        .image-preview {
+          width: 80px;
+          height: 80px;
+          border-radius: 20px;
+          background: var(--bg-card);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px dashed var(--border-light);
+          margin-bottom: 16px;
+          overflow: hidden;
+          font-size: 2rem;
+        }
+        .image-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .message-bubble {
+          background: var(--bg-card);
+          padding: 12px 16px;
+          border-radius: 20px 20px 20px 4px;
+          margin-bottom: 10px;
+          max-width: 85%;
+          border: 1px solid var(--border-light);
+          color: var(--text-primary);
+        }
+        .message-bubble.me {
+          background: var(--accent);
+          color: white;
+          margin-left: auto;
+          border-radius: 20px 20px 4px 20px;
+        }
+
+        /* login screen overlay */
+        .login-screen {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: var(--bg-app);
+          z-index: 200;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 30px;
+          gap: 24px;
+          backdrop-filter: blur(10px);
+        }
+        .login-screen.hidden { display: none; }
+        .login-btn {
+          width: 100%;
+          max-width: 280px;
+          border-radius: 60px;
+        }
+
+        .small-note {
+          color: var(--text-tertiary);
+          font-size: 0.8rem;
+          margin: 12px 0;
+        }
+        hr { border: none; border-top: 1px solid var(--border-light); margin: 20px 0; }
+
+        /* filter bar */
+        .filter-bar {
+          display: flex;
+          gap: 8px;
+          margin: 16px 0;
+          flex-wrap: wrap;
+        }
+        .filter-select {
+          flex: 1;
+          min-width: 110px;
+          padding: 12px;
+          border-radius: 30px;
+          background: var(--bg-card);
+          border: 1px solid var(--border-light);
+          color: var(--text-primary);
+        }
+    </style>
+</head>
+<body id="body">
+<div id="app">
+    <!-- LOGIN OVERLAY (simulates auth) -->
+    <div id="loginOverlay" class="login-screen">
+        <div class="logo" style="font-size: 3rem;">ReConnect<span>.</span></div>
+        <p style="color: var(--text-secondary); text-align: center; max-width: 240px;">smart lost & found — built for Africa</p>
+        <button class="login-btn" id="loginUserBtn"><i class="fas fa-user-check"></i>  Continue as John (verified)</button>
+        <button class="login-btn secondary" id="loginAdminBtn"><i class="fas fa-shield-alt"></i>  Continue as Admin</button>
+        <p class="small-note">(registration simulation — tap to start)</p>
+    </div>
+
+    <!-- MAIN APP (hidden until login) -->
+    <div id="mainApp" style="display: flex; flex-direction: column; height: 100%;">
+        <!-- top bar with user badge & theme toggle -->
+        <div class="top-bar">
+            <div class="logo">ReConnect<span>.</span></div>
+            <div class="top-actions">
+                <div class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></div>
+                <div class="user-badge" id="userBadge"></div>
+            </div>
+        </div>
+
+        <!-- dynamic content area -->
+        <div class="main-content" id="contentArea"></div>
+
+        <!-- bottom navigation (admin item appears conditionally) -->
+        <div class="bottom-nav" id="bottomNav">
+            <div class="nav-item" data-page="home"><i class="fas fa-compass"></i><span>Home</span></div>
+            <div class="nav-item" data-page="report"><i class="fas fa-plus-circle"></i><span>Report</span></div>
+            <div class="nav-item" data-page="messages"><i class="fas fa-comment-dots"></i><span>Chat</span></div>
+            <div class="nav-item" data-page="profile"><i class="fas fa-id-card"></i><span>Profile</span></div>
+            <div class="nav-item" data-page="admin" id="adminNavItem" style="display: none;"><i class="fas fa-chart-line"></i><span>Admin</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+      // ---------- MOCK DATA / STATE ----------
+      const users = [
+        { id: 'u1', name: 'John O.', isAdmin: false, verified: true },
+        { id: 'u2', name: 'Admin User', isAdmin: true, verified: true }
+      ];
+
+      let items = [
+        { id: 'i1', type: 'found', userId: 'u1', userName: 'John O.', itemName: 'Samsung Galaxy A12', category: 'Phone', description: 'Black phone with cracked back, found at taxi rank', location: 'Nairobi, CBD', date: '2025-02-20', image: '📱', status: 'open', claimantId: null, claimantName: null, verificationMsg: null },
+        { id: 'i2', type: 'lost', userId: 'u2', userName: 'Admin User', itemName: 'Blue wallet', category: 'Wallet', description: 'Blue leather wallet with ID cards and some cash', location: 'Yaya Centre', date: '2025-02-22', image: '👛', status: 'open', claimantId: null, claimantName: null, verificationMsg: null },
+        { id: 'i3', type: 'found', userId: 'u2', userName: 'Admin User', itemName: 'House keys', category: 'Keys', description: 'Set of 3 keys with a blue fob', location: 'Kibera', date: '2025-02-21', image: '🔑', status: 'claimed', claimantId: 'u1', claimantName: 'John O.', verificationMsg: 'It has a blue fob and a scratch' },
+        { id: 'i4', type: 'found', userId: 'u1', userName: 'John O.', itemName: 'NIC ID card', category: 'ID', description: 'National ID card name: Mary Wanjiku', location: 'Westlands', date: '2025-02-19', image: '🆔', status: 'closed', claimantId: 'u2', claimantName: 'Admin User', verificationMsg: 'Name matches Mary' },
+      ];
+
+      let messages = [
+        { id: 'm1', itemId: 'i3', from: 'u1', to: 'u2', text: 'Hi, I think those are my keys. They have a blue fob?', timestamp: Date.now() - 3600000 },
+        { id: 'm2', itemId: 'i3', from: 'u2', to: 'u1', text: 'Yes, they do. Can you describe the scratch?', timestamp: Date.now() - 1800000 },
+        { id: 'm3', itemId: 'i3', from: 'u1', to: 'u2', text: 'Small scratch near the head.', timestamp: Date.now() - 600000 },
+      ];
+
+      let currentUser = null;
+      let currentPage = 'home';
+      let selectedItemId = null;
+      let filterType = 'all';
+      let filterCategory = '';
+      let filterLocation = '';
+
+      // DOM elements
+      const loginOverlay = document.getElementById('loginOverlay');
+      const mainApp = document.getElementById('mainApp');
+      const contentArea = document.getElementById('contentArea');
+      const userBadge = document.getElementById('userBadge');
+      const bottomNav = document.getElementById('bottomNav');
+      const adminNavItem = document.getElementById('adminNavItem');
+      const themeToggle = document.getElementById('themeToggle');
+
+      // ---------- theme handling ----------
+      let darkMode = false;
+      themeToggle.addEventListener('click', () => {
+        darkMode = !darkMode;
+        document.body.classList.toggle('dark-theme', darkMode);
+        themeToggle.innerHTML = darkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+      });
+
+      // ---------- helper functions ----------
+      function updateUserBadge() {
+        if (!currentUser) return;
+        const verifiedIcon = currentUser.verified ? '<i class="fas fa-check-circle verified" title="verified"></i>' : '';
+        userBadge.innerHTML = `<span>${currentUser.name}</span> ${verifiedIcon}`;
+      }
+
+      function toggleAdminNav() {
+        adminNavItem.style.display = currentUser?.isAdmin ? 'flex' : 'none';
+      }
+
+      function navigateTo(page) {
+        currentPage = page;
+        selectedItemId = null;
+        updateContent();
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        const activeNav = document.querySelector(`.nav-item[data-page="${page}"]`);
+        if (activeNav) activeNav.classList.add('active');
+      }
+
+      // smart matching
+      function findPossibleMatches(lostItem) {
+        return items.filter(it => it.type === 'found' && it.status === 'open' && it.category === lostItem.category)
+            .map(found => {
+              const lostWords = new Set(lostItem.description.toLowerCase().split(/\W+/));
+              const foundWords = new Set(found.description.toLowerCase().split(/\W+/));
+              const common = [...lostWords].filter(word => foundWords.has(word) && word.length > 3).length;
+              return { ...found, matchScore: common };
+            })
+            .filter(f => f.matchScore > 0 || f.category === lostItem.category)
+            .sort((a,b) => b.matchScore - a.matchScore);
+      }
+
+      function claimItem(itemId, verificationMsg) {
+        const item = items.find(i => i.id === itemId);
+        if (!item || item.type !== 'found' || item.status !== 'open') return;
+        item.status = 'claimed';
+        item.claimantId = currentUser.id;
+        item.claimantName = currentUser.name;
+        item.verificationMsg = verificationMsg;
+        messages.push({
+          id: 'm' + Date.now(),
+          itemId: itemId,
+          from: currentUser.id,
+          to: item.userId,
+          text: `Claim submitted: ${verificationMsg}`,
+          timestamp: Date.now()
+        });
+        alert('✅ Claim submitted! Finder will be notified.');
+        updateContent();
+      }
+
+      function closeItem(itemId) {
+        const item = items.find(i => i.id === itemId);
+        if (item && (item.userId === currentUser.id || currentUser.isAdmin)) {
+          item.status = 'closed';
+          updateContent();
+        }
+      }
+
+      function deleteItem(itemId) {
+        if (!currentUser.isAdmin) return;
+        items = items.filter(i => i.id !== itemId);
+        messages = messages.filter(m => m.itemId !== itemId);
+        updateContent();
+      }
+
+      function addReport(type, data) {
+        const newItem = {
+          id: 'i' + Date.now(),
+          type: type,
+          userId: currentUser.id,
+          userName: currentUser.name,
+          itemName: data.itemName,
+          category: data.category,
+          description: data.description,
+          location: data.location,
+          date: data.date,
+          image: data.imagePreview || '📦',
+          status: 'open',
+          claimantId: null,
+          claimantName: null,
+          verificationMsg: null,
+        };
+        items.push(newItem);
+        if (type === 'lost') {
+          const matches = findPossibleMatches(newItem);
+          if (matches.length > 0) {
+            setTimeout(() => {
+              alert(`🔍 Smart match: ${matches.length} possible found item(s) based on category & keywords.`);
+            }, 100);
+          }
+        }
+        navigateTo('home');
+      }
+
+      function getFilteredItems() {
+        return items.filter(it => {
+          if (filterType !== 'all' && it.type !== filterType) return false;
+          if (filterCategory && it.category !== filterCategory) return false;
+          if (filterLocation && !it.location.toLowerCase().includes(filterLocation.toLowerCase())) return false;
+          return true;
+        });
+      }
+
+      // ---------- RENDER VIEWS ----------
+      function updateContent() {
+        if (!currentUser) return;
+        updateUserBadge();
+        toggleAdminNav();
+
+        if (currentPage === 'home') renderHome();
+        else if (currentPage === 'report') renderReportMenu();
+        else if (currentPage === 'report-lost') renderReportForm('lost');
+        else if (currentPage === 'report-found') renderReportForm('found');
+        else if (currentPage === 'messages') renderMessages();
+        else if (currentPage === 'profile') renderProfile();
+        else if (currentPage === 'admin' && currentUser.isAdmin) renderAdmin();
+        else if (currentPage === 'item-detail' && selectedItemId) renderItemDetail(selectedItemId);
+        else renderHome();
+      }
+
+      function renderHome() {
+        const filtered = getFilteredItems();
+        let html = `
+          <div style="margin-bottom: 12px;">
+            <h2 style="color: var(--text-primary);">Feed</h2>
+            <div class="filter-bar">
+              <select class="filter-select" id="filterType">
+                <option value="all">All</option>
+                <option value="lost" ${filterType==='lost'?'selected':''}>Lost</option>
+                <option value="found" ${filterType==='found'?'selected':''}>Found</option>
+              </select>
+              <select class="filter-select" id="filterCategory">
+                <option value="">Category</option>
+                <option value="Phone" ${filterCategory==='Phone'?'selected':''}>Phone</option>
+                <option value="ID" ${filterCategory==='ID'?'selected':''}>ID</option>
+                <option value="Wallet" ${filterCategory==='Wallet'?'selected':''}>Wallet</option>
+                <option value="Keys" ${filterCategory==='Keys'?'selected':''}>Keys</option>
+                <option value="Bag" ${filterCategory==='Bag'?'selected':''}>Bag</option>
+              </select>
+            </div>
+            <input type="text" placeholder="Filter by location" id="filterLocation" value="${filterLocation}" style="margin-top: 0; background: var(--bg-card);">
+          </div>
+        `;
+
+        filtered.forEach(item => {
+          html += `
+            <div class="card" onclick="window.selectItem('${item.id}')">
+              <div class="flex-row" style="justify-content:space-between;">
+                <span style="font-weight: 600; color: var(--text-primary);">${item.itemName}</span>
+                <span class="status ${item.status}">${item.status}</span>
+              </div>
+              <div class="flex-row" style="font-size:0.85rem; color: var(--text-secondary); margin: 6px 0;">
+                <span><i class="fas fa-map-pin"></i> ${item.location}</span>
+                <span><i class="far fa-calendar"></i> ${item.date}</span>
+              </div>
+              <p style="color: var(--text-secondary); margin-bottom: 8px;">${item.description.substring(0,55)}…</p>
+              <div class="flex-row" style="justify-content: space-between;">
+                <span><i class="fas fa-user-circle"></i> ${item.userName} ${item.userId==='u1'?'⭐':''}</span>
+                <span class="chip">${item.type}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        contentArea.innerHTML = html;
+        document.getElementById('filterType')?.addEventListener('change', (e) => { filterType = e.target.value; renderHome(); });
+        document.getElementById('filterCategory')?.addEventListener('change', (e) => { filterCategory = e.target.value; renderHome(); });
+        document.getElementById('filterLocation')?.addEventListener('input', (e) => { filterLocation = e.target.value; renderHome(); });
+      }
+
+      window.selectItem = (id) => {
+        selectedItemId = id;
+        currentPage = 'item-detail';
+        updateContent();
+      };
+
+      function renderItemDetail(id) {
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+        const isFinder = item.userId === currentUser.id;
+        const isClaimant = item.claimantId === currentUser.id;
+        const canClaim = (item.type === 'found' && item.status === 'open' && !isFinder);
+
+        let claimSection = '';
+        if (canClaim) {
+          claimSection = `
+            <div class="card" style="background: var(--accent-soft); border: 1px solid var(--accent);">
+              <h4 style="color: var(--accent);">📋 Claim this item</h4>
+              <textarea id="claimMsg" placeholder="Describe unique feature to verify..." rows="2"></textarea>
+              <button class="small" onclick="window.submitClaim('${item.id}')">Submit claim</button>
+            </div>
+          `;
+        } else if (item.status === 'claimed' && (isFinder || currentUser.isAdmin)) {
+          claimSection = `<div class="card"><p><strong>Claimed by:</strong> ${item.claimantName}</p><p><strong>Verification:</strong> "${item.verificationMsg}"</p>`;
+          if (isFinder || currentUser.isAdmin) {
+            claimSection += `<button class="small" onclick="window.closeItemFn('${item.id}')">✓ Mark as closed (handed over)</button>`;
+          }
+          claimSection += '</div>';
+        }
+
+        const itemMessages = messages.filter(m => m.itemId === item.id).slice(-3);
+        const chatHtml = itemMessages.map(m => {
+          const isMe = m.from === currentUser.id;
+          return `<div class="message-bubble ${isMe ? 'me' : ''}">${m.text}</div>`;
+        }).join('');
+
+        const adminActions = currentUser.isAdmin ? `<button class="small secondary" onclick="window.deleteItemFn('${item.id}')"><i class="fas fa-trash-alt"></i> Delete (admin)</button>` : '';
+
+        contentArea.innerHTML = `
+          <button class="secondary small" onclick="window.navigateTo('home')"><i class="fas fa-arrow-left"></i> Back</button>
+          <div class="card" style="margin-top: 16px;">
+            <div class="flex-row" style="justify-content: space-between;">
+              <h2 style="color: var(--text-primary);">${item.itemName}</h2>
+              <span class="status ${item.status}">${item.status}</span>
+            </div>
+            <p><span class="chip">${item.category}</span> <span class="chip">${item.type}</span></p>
+            <p><i class="fas fa-location-dot" style="color: var(--accent);"></i> ${item.location} · ${item.date}</p>
+            <p style="margin: 12px 0; color: var(--text-secondary);">${item.description}</p>
+            <p><i class="fas fa-user"></i> Reported by ${item.userName} ${item.userId==='u1'?'✅':''}</p>
+          </div>
+          ${claimSection}
+          <div class="card">
+            <h4 style="color: var(--text-primary);">💬 Conversation</h4>
+            <div style="margin-bottom: 16px;">${chatHtml || '<p class="small-note">No messages yet. Start the conversation.</p>'}</div>
+            <textarea id="newMsg" placeholder="Write a message..." rows="1"></textarea>
+            <button class="small" onclick="window.sendMessage('${item.id}')">Send</button>
+          </div>
+          ${adminActions}
+        `;
+      }
+
+      window.submitClaim = (itemId) => {
+        const msg = document.getElementById('claimMsg')?.value;
+        if (!msg) return alert('Please enter a verification detail');
+        claimItem(itemId, msg);
+      };
+      window.closeItemFn = closeItem;
+      window.deleteItemFn = deleteItem;
+      window.sendMessage = (itemId) => {
+        const txt = document.getElementById('newMsg')?.value;
+        if (!txt) return;
+        const otherUser = items.find(i => i.id === itemId)?.userId === currentUser.id ?
+            items.find(i => i.id === itemId)?.claimantId : items.find(i => i.id === itemId)?.userId;
+        messages.push({
+          id: 'm'+Date.now(),
+          itemId: itemId,
+          from: currentUser.id,
+          to: otherUser,
+          text: txt,
+          timestamp: Date.now()
+        });
+        renderItemDetail(itemId);
+      };
+
+      function renderReportMenu() {
+        contentArea.innerHTML = `
+          <h2 style="color: var(--text-primary);">Report an item</h2>
+          <p class="small-note">Choose one option below</p>
+          <div style="display: flex; gap: 16px; margin: 32px 0;">
+            <button style="flex:1;" onclick="window.navigateTo('report-lost')"><i class="fas fa-search"></i> Lost</button>
+            <button style="flex:1;" onclick="window.navigateTo('report-found')"><i class="fas fa-hand-holding-heart"></i> Found</button>
+          </div>
+          <div class="card" style="background: var(--accent-soft);">
+            <i class="fas fa-robot" style="color: var(--accent);"></i>
+            <p><strong>Smart matching</strong> — our AI will suggest possible matches automatically.</p>
+          </div>
+        `;
+      }
+
+      function renderReportForm(type) {
+        const title = type === 'lost' ? 'Report lost item' : 'Report found item';
+        contentArea.innerHTML = `
+          <button class="secondary small" onclick="window.navigateTo('report')"><i class="fas fa-arrow-left"></i> Back</button>
+          <h3 style="margin: 16px 0 8px; color: var(--text-primary);">${title}</h3>
+          <div id="reportForm">
+            <label>Item name</label>
+            <input id="itemName" placeholder="e.g., Samsung phone" />
+            <label>Category</label>
+            <select id="category">
+              <option>Phone</option><option>ID</option><option>Wallet</option><option>Keys</option><option>Bag</option><option>Documents</option>
+            </select>
+            <label>Description</label>
+            <textarea id="description" rows="2" placeholder="Color, distinctive features..."></textarea>
+            <label>Location</label>
+            <input id="location" placeholder="Nairobi, CBD" />
+            <label>Date</label>
+            <input type="date" id="date" value="${new Date().toISOString().split('T')[0]}" />
+            <label>Image (preview)</label>
+            <div class="image-preview" id="preview"><i class="fas fa-camera"></i></div>
+            <input type="file" id="imageFile" accept="image/*" />
+            <button style="margin-top: 20px;" onclick="window.submitReport('${type}')">Submit report</button>
+          </div>
+        `;
+        document.getElementById('imageFile')?.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+              document.getElementById('preview').innerHTML = `<img src="${ev.target.result}" />`;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      window.submitReport = (type) => {
+        const data = {
+          itemName: document.getElementById('itemName')?.value,
+          category: document.getElementById('category')?.value,
+          description: document.getElementById('description')?.value,
+          location: document.getElementById('location')?.value,
+          date: document.getElementById('date')?.value,
+          imagePreview: '📸'
+        };
+        if (!data.itemName || !data.location) return alert('Please fill required fields');
+        addReport(type, data);
+      };
+
+      function renderMessages() {
+        const conversations = {};
+        messages.forEach(m => { if (!conversations[m.itemId]) conversations[m.itemId] = []; conversations[m.itemId].push(m); });
+        let html = '<h2 style="color: var(--text-primary);">Messages</h2>';
+        for (let itemId in conversations) {
+          const item = items.find(i => i.id === itemId);
+          if (!item) continue;
+          const last = conversations[itemId].slice(-1)[0];
+          html += `<div class="card" onclick="window.selectItem('${itemId}')">
+            <div style="display: flex; justify-content: space-between;">
+              <b style="color: var(--text-primary);">${item.itemName}</b> <span class="status ${item.status}">${item.status}</span>
+            </div>
+            <p class="small-note">${last.text.substring(0,40)}…</p>
+          </div>`;
+        }
+        contentArea.innerHTML = html || '<p class="small-note">No messages yet.</p>';
+      }
+
+      function renderProfile() {
+        contentArea.innerHTML = `
+          <h2 style="color: var(--text-primary);">Profile</h2>
+          <div class="card">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <i class="fas fa-user-circle" style="font-size: 3rem; color: var(--accent);"></i>
+              <div>
+                <h3 style="color: var(--text-primary);">${currentUser.name}</h3>
+                <p>${currentUser.verified ? '✅ Verified member' : 'Unverified'}</p>
+              </div>
+            </div>
+            <hr>
+            <p><i class="fas fa-star" style="color: gold;"></i> Trust score: 98% · 12 reports</p>
+            <button class="secondary small" style="margin-top: 12px;" onclick="window.logoutSim()">Log out</button>
+          </div>
+          <div class="card">
+            <h4>Your activity</h4>
+            <p>📦 Items reported: ${items.filter(i => i.userId === currentUser.id).length}</p>
+            <p>🤝 Claims: ${items.filter(i => i.claimantId === currentUser.id).length}</p>
+          </div>
+        `;
+      }
+
+      function renderAdmin() {
+        if (!currentUser.isAdmin) return;
+        let html = '<h2 style="color: var(--text-primary);">Admin panel</h2>';
+        items.forEach(item => {
+          html += `<div class="card" style="border-left: 4px solid ${item.type==='lost'?'#f5b17b':'#3fb4b0'}">
+            <div style="display: flex; justify-content: space-between;">
+              <b>${item.itemName}</b> <span class="status ${item.status}">${item.status}</span>
+            </div>
+            <p>${item.location} · by ${item.userName}</p>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button class="small" onclick="window.closeItemFn('${item.id}')">✓ Resolve</button>
+              <button class="small secondary" onclick="window.deleteItemFn('${item.id}')">✗ Remove</button>
+            </div>
+          </div>`;
+        });
+        contentArea.innerHTML = html;
+      }
+
+      // login simulation
+      document.getElementById('loginUserBtn').addEventListener('click', () => {
+        currentUser = users[0];
+        loginOverlay.classList.add('hidden');
+        mainApp.style.display = 'flex';
+        navigateTo('home');
+      });
+      document.getElementById('loginAdminBtn').addEventListener('click', () => {
+        currentUser = users[1];
+        loginOverlay.classList.add('hidden');
+        mainApp.style.display = 'flex';
+        navigateTo('admin');
+      });
+
+      window.navigateTo = navigateTo;
+      window.logoutSim = () => {
+        currentUser = null;
+        loginOverlay.classList.remove('hidden');
+        mainApp.style.display = 'none';
+      };
+
+      // bottom nav listeners
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.addEventListener('click', (e) => {
+          const page = el.dataset.page;
+          if (page === 'admin' && !currentUser?.isAdmin) return;
+          navigateTo(page);
+        });
+      });
+
+      // init
+      loginOverlay.classList.remove('hidden');
+      mainApp.style.display = 'none';
+    })();
+</script>
+</body>
+</html>

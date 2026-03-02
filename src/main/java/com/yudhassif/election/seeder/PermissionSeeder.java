@@ -39,6 +39,7 @@ public class PermissionSeeder implements CommandLineRunner {
         createPermission("SUSPEND_ELECTION", adminRole); // remain testing mannual
         createPermission("ELECTION_UPDATE", adminRole); //done
         createPermission("ELECTION_DELETE", adminRole); // done
+        createPermission("CANDIDATE_ASSIGN", adminRole);  //done
 
 
 

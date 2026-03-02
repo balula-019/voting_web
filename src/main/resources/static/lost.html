@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>ReConnect · smart lost & found</title>
+    <!-- Font Awesome (icons) & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+        body {
+          background: #f4f7fb;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+        }
+        #app {
+          width: 100%;
+          max-width: 420px;
+          background: white;
+          border-radius: 32px 32px 0 0;
+          box-shadow: 0 0 30px rgba(0,0,0,0.05);
+          height: 700px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          position: relative;
+        }
+        /* header / top bar */
+        .top-bar {
+          padding: 20px 20px 12px;
+          background: white;
+          border-bottom: 1px solid #eef2f6;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .logo {
+          font-weight: 700;
+          font-size: 1.5rem;
+          letter-spacing: -0.5px;
+          color: #1A2E45;
+        }
+        .logo span {
+          color: #2B7A78;
+        }
+        .user-badge {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #f0f4fa;
+          padding: 6px 12px;
+          border-radius: 40px;
+          font-size: 0.9rem;
+        }
+        .verified {
+          color: #2B7A78;
+          font-size: 1rem;
+        }
+        /* main content area (dynamic) */
+        .main-content {
+          flex: 1;
+          overflow-y: auto;
+          padding: 16px 20px;
+          background: #ffffff;
+        }
+        /* bottom navigation */
+        .bottom-nav {
+          background: white;
+          border-top: 1px solid #eef2f6;
+          display: flex;
+          justify-content: space-around;
+          padding: 8px 16px 12px;
+        }
+        .nav-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          color: #7d8b9f;
+          font-size: 0.7rem;
+          transition: 0.2s;
+          cursor: pointer;
+        }
+        .nav-item i {
+          font-size: 1.4rem;
+          margin-bottom: 2px;
+        }
+        .nav-item.active {
+          color: #2B7A78;
+          font-weight: 600;
+        }
+        /* buttons & forms */
+        button, .btn {
+          background: #2B7A78;
+          border: none;
+          color: white;
+          padding: 12px 18px;
+          border-radius: 40px;
+          font-weight: 600;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: 0.15s;
+          border: 1px solid transparent;
+        }
+        button.secondary {
+          background: white;
+          color: #1A2E45;
+          border: 1px solid #cdd9e6;
+        }
+        button.small {
+          padding: 8px 14px;
+          font-size: 0.9rem;
+        }
+        button:active { opacity: 0.8; }
+        input, textarea, select {
+          width: 100%;
+          padding: 14px 16px;
+          border: 1px solid #dae2ed;
+          border-radius: 24px;
+          font-size: 1rem;
+          background: #f9fcff;
+          margin-bottom: 16px;
+        }
+        label {
+          font-weight: 600;
+          font-size: 0.9rem;
+          margin-bottom: 4px;
+          display: block;
+          color: #1e2f41;
+        }
+        .card {
+          background: #f9fcff;
+          border-radius: 24px;
+          padding: 16px;
+          margin-bottom: 16px;
+          border: 1px solid #e6ecf3;
+        }
+        .flex-row {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+        .chip {
+          background: white;
+          border-radius: 50px;
+          padding: 6px 16px;
+          border: 1px solid #2B7A78;
+          color: #2B7A78;
+          font-size: 0.8rem;
+          font-weight: 600;
+        }
+        .badge {
+          background: #2B7A78;
+          color: white;
+          border-radius: 20px;
+          padding: 4px 12px;
+          font-size: 0.7rem;
+        }
+        .status {
+          font-size: 0.8rem;
+          padding: 4px 8px;
+          border-radius: 40px;
+          background: #e7edf5;
+          display: inline-block;
+        }
+        .status.claimed { background: #fdf6e3; color: #b85b14; }
+        .status.closed { background: #e1f0e8; color: #1f7840; }
+        /* image preview */
+        .image-preview {
+          width: 80px;
+          height: 80px;
+          border-radius: 16px;
+          background: #eef2f6;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px dashed #a0b8cc;
+          margin-bottom: 16px;
+          overflow: hidden;
+        }
+        .image-preview img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .message-bubble {
+          background: #f0f4fa;
+          padding: 12px;
+          border-radius: 18px;
+          margin-bottom: 8px;
+          max-width: 85%;
+        }
+        .message-bubble.me {
+          background: #2B7A78;
+          color: white;
+          margin-left: auto;
+        }
+        /* login screen overlay */
+        .login-screen {
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: white;
+          z-index: 100;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 30px;
+          gap: 20px;
+        }
+        .login-screen.hidden { display: none; }
+        .login-btn {
+          width: 100%;
+          max-width: 280px;
+        }
+        .mt-2 { margin-top: 12px; }
+        .text-center { text-align: center; }
+        .small-note { color: #6f7d91; font-size: 0.8rem; margin: 8px 0; }
+        hr { border: none; border-top: 1px solid #e1e8f0; margin: 20px 0; }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- LOGIN OVERLAY (simulates auth) -->
+    <div id="loginOverlay" class="login-screen">
+        <div class="logo" style="font-size: 2.5rem;">ReConnect<span>.</span></div>
+        <p style="color:#3a4e64; margin-bottom: 30px; text-align: center;">smart lost & found — Africa</p>
+        <button class="login-btn" id="loginUserBtn"><i class="fas fa-user"></i>  Continue as John (verified)</button>
+        <button class="login-btn secondary" id="loginAdminBtn"><i class="fas fa-shield-alt"></i>  Continue as Admin</button>
+        <p class="small-note">(registration simulation — just pick a role)</p>
+    </div>
+
+    <!-- MAIN APP (hidden until login) -->
+    <div id="mainApp" style="display: flex; flex-direction: column; height: 100%;">
+        <!-- top bar with user info -->
+        <div class="top-bar">
+            <div class="logo">ReConnect<span>.</span></div>
+            <div class="user-badge" id="userBadge">
+                <!-- dynamic from JS -->
+            </div>
+        </div>
+
+        <!-- dynamic content area -->
+        <div class="main-content" id="contentArea">
+            <!-- JS will inject views here -->
+        </div>
+
+        <!-- bottom navigation (hidden for admin? but we keep) -->
+        <div class="bottom-nav" id="bottomNav">
+            <div class="nav-item" data-page="home"><i class="fas fa-home"></i><span>Home</span></div>
+            <div class="nav-item" data-page="report"><i class="fas fa-plus-circle"></i><span>Report</span></div>
+            <div class="nav-item" data-page="messages"><i class="fas fa-comment-dots"></i><span>Messages</span></div>
+            <div class="nav-item" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></div>
+            <div class="nav-item" data-page="admin" id="adminNavItem" style="display: none;"><i class="fas fa-cog"></i><span>Admin</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+      // ---------- MOCK DATA / STATE ----------
+      const users = [
+        { id: 'u1', name: 'John O.', isAdmin: false, verified: true },
+        { id: 'u2', name: 'Admin User', isAdmin: true, verified: true }
+      ];
+
+      // items (lost/found)
+      let items = [
+        { id: 'i1', type: 'found', userId: 'u1', userName: 'John O.', itemName: 'Samsung Galaxy A12', category: 'Phone', description: 'Black phone with cracked back, found at taxi rank', location: 'Nairobi, CBD', date: '2025-02-20', image: '📱', status: 'open', claimantId: null, claimantName: null, verificationMsg: null },
+        { id: 'i2', type: 'lost', userId: 'u2', userName: 'Admin User', itemName: 'Blue wallet', category: 'Wallet', description: 'Blue leather wallet with ID cards and some cash', location: 'Yaya Centre', date: '2025-02-22', image: '👛', status: 'open', claimantId: null, claimantName: null, verificationMsg: null },
+        { id: 'i3', type: 'found', userId: 'u2', userName: 'Admin User', itemName: 'House keys', category: 'Keys', description: 'Set of 3 keys with a blue fob', location: 'Kibera', date: '2025-02-21', image: '🔑', status: 'claimed', claimantId: 'u1', claimantName: 'John O.', verificationMsg: 'It has a blue fob and a scratch' },
+        { id: 'i4', type: 'found', userId: 'u1', userName: 'John O.', itemName: 'NIC ID card', category: 'ID', description: 'National ID card name: Mary Wanjiku', location: 'Westlands', date: '2025-02-19', image: '🆔', status: 'closed', claimantId: 'u2', claimantName: 'Admin User', verificationMsg: 'Name matches Mary' },
+      ];
+
+      // messages (conversations per item)
+      let messages = [
+        { id: 'm1', itemId: 'i3', from: 'u1', to: 'u2', text: 'Hi, I think those are my keys. They have a blue fob?', timestamp: Date.now() - 3600000 },
+        { id: 'm2', itemId: 'i3', from: 'u2', to: 'u1', text: 'Yes, they do. Can you describe the scratch?', timestamp: Date.now() - 1800000 },
+        { id: 'm3', itemId: 'i3', from: 'u1', to: 'u2', text: 'Small scratch near the head.', timestamp: Date.now() - 600000 },
+      ];
+
+      // current session user (set after login)
+      let currentUser = null;
+
+      // UI state
+      let currentPage = 'home';
+      let selectedItemId = null;          // for detail view
+      let filterType = 'all';             // lost/found/all
+      let filterCategory = '';
+      let filterLocation = '';
+
+      // ---------- DOM elements ----------
+      const loginOverlay = document.getElementById('loginOverlay');
+      const mainApp = document.getElementById('mainApp');
+      const contentArea = document.getElementById('contentArea');
+      const userBadge = document.getElementById('userBadge');
+      const bottomNav = document.getElementById('bottomNav');
+      const adminNavItem = document.getElementById('adminNavItem');
+
+      // ---------- helper functions ----------
+      function formatDate(dateStr) { return dateStr; }
+
+      // render user badge
+      function updateUserBadge() {
+        if (!currentUser) return;
+        const verifiedIcon = currentUser.verified ? '<i class="fas fa-check-circle verified" title="verified"></i>' : '';
+        userBadge.innerHTML = `<span>${currentUser.name}</span> ${verifiedIcon}`;
+      }
+
+      // show/hide admin nav
+      function toggleAdminNav() {
+        if (currentUser && currentUser.isAdmin) {
+          adminNavItem.style.display = 'flex';
+        } else {
+          adminNavItem.style.display = 'none';
+        }
+      }
+
+      // navigation handler
+      function navigateTo(page) {
+        currentPage = page;
+        selectedItemId = null;
+        updateContent();
+        // update active nav
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        const activeNav = document.querySelector(`.nav-item[data-page="${page}"]`);
+        if (activeNav) activeNav.classList.add('active');
+      }
+
+      // ---------- smart matching (lost vs found) ----------
+      function findPossibleMatches(lostItem) {
+        // based on category + keyword overlap
+        return items.filter(it => it.type === 'found' && it.status === 'open' && it.category === lostItem.category)
+            .map(found => {
+              const lostWords = new Set(lostItem.description.toLowerCase().split(/\W+/));
+              const foundWords = new Set(found.description.toLowerCase().split(/\W+/));
+              const common = [...lostWords].filter(word => foundWords.has(word) && word.length > 3).length;
+              return { ...found, matchScore: common };
+            })
+            .filter(f => f.matchScore > 0 || f.category === lostItem.category)  // at least category match
+            .sort((a,b) => b.matchScore - a.matchScore);
+      }
+
+      // claim an item (found)
+      function claimItem(itemId, verificationMsg) {
+        const item = items.find(i => i.id === itemId);
+        if (!item || item.type !== 'found' || item.status !== 'open') return;
+        item.status = 'claimed';
+        item.claimantId = currentUser.id;
+        item.claimantName = currentUser.name;
+        item.verificationMsg = verificationMsg;
+        // create automatic message thread (simulate)
+        messages.push({
+          id: 'm' + Date.now(),
+          itemId: itemId,
+          from: currentUser.id,
+          to: item.userId,
+          text: `Claim submitted: ${verificationMsg}`,
+          timestamp: Date.now()
+        });
+        alert('Claim submitted! Finder will be notified.');
+        updateContent();
+      }
+
+      // close item (finder or admin)
+      function closeItem(itemId) {
+        const item = items.find(i => i.id === itemId);
+        if (item && (item.userId === currentUser.id || currentUser.isAdmin)) {
+          item.status = 'closed';
+          updateContent();
+        }
+      }
+
+      // delete item (admin only)
+      function deleteItem(itemId) {
+        if (!currentUser.isAdmin) return;
+        items = items.filter(i => i.id !== itemId);
+        messages = messages.filter(m => m.itemId !== itemId);
+        updateContent();
+      }
+
+      // report lost/found
+      function addReport(type, data) {
+        const newItem = {
+          id: 'i' + Date.now(),
+          type: type,
+          userId: currentUser.id,
+          userName: currentUser.name,
+          itemName: data.itemName,
+          category: data.category,
+          description: data.description,
+          location: data.location,
+          date: data.date,
+          image: data.imagePreview || '📦',
+          status: 'open',
+          claimantId: null,
+          claimantName: null,
+          verificationMsg: null,
+        };
+        items.push(newItem);
+        if (type === 'lost') {
+          const matches = findPossibleMatches(newItem);
+          if (matches.length > 0) {
+            setTimeout(() => {
+              alert(`🔍 Smart match: ${matches.length} possible found item(s) based on category & keywords. Check home feed.`);
+            }, 100);
+          }
+        }
+        navigateTo('home');
+      }
+
+      // filter items
+      function getFilteredItems() {
+        return items.filter(it => {
+          if (filterType !== 'all' && it.type !== filterType) return false;
+          if (filterCategory && it.category !== filterCategory) return false;
+          if (filterLocation && !it.location.toLowerCase().includes(filterLocation.toLowerCase())) return false;
+          return true;
+        });
+      }
+
+      // ---------- RENDER VIEWS ----------
+      function updateContent() {
+        if (!currentUser) return;
+        updateUserBadge();
+        toggleAdminNav();
+
+        if (currentPage === 'home') renderHome();
+        else if (currentPage === 'report') renderReportMenu();
+        else if (currentPage === 'report-lost') renderReportForm('lost');
+        else if (currentPage === 'report-found') renderReportForm('found');
+        else if (currentPage === 'messages') renderMessages();
+        else if (currentPage === 'profile') renderProfile();
+        else if (currentPage === 'admin' && currentUser.isAdmin) renderAdmin();
+        else if (currentPage === 'item-detail' && selectedItemId) renderItemDetail(selectedItemId);
+        else renderHome(); // fallback
+      }
+
+      function renderHome() {
+        const filtered = getFilteredItems();
+        let html = `
+          <div style="margin-bottom: 16px;">
+            <h3>Lost & Found feed</h3>
+            <div class="flex-row" style="margin-top: 8px;">
+              <select id="filterType" style="width: auto; flex:1; padding: 10px;">
+                <option value="all">All types</option>
+                <option value="lost" ${filterType==='lost'?'selected':''}>Lost</option>
+                <option value="found" ${filterType==='found'?'selected':''}>Found</option>
+              </select>
+              <select id="filterCategory" style="width: auto; flex:1; padding: 10px;">
+                <option value="">Category</option>
+                <option value="Phone" ${filterCategory==='Phone'?'selected':''}>Phone</option>
+                <option value="ID" ${filterCategory==='ID'?'selected':''}>ID</option>
+                <option value="Wallet" ${filterCategory==='Wallet'?'selected':''}>Wallet</option>
+                <option value="Keys" ${filterCategory==='Keys'?'selected':''}>Keys</option>
+              </select>
+            </div>
+            <input type="text" placeholder="Filter by location" id="filterLocation" value="${filterLocation}" style="margin-top: 8px; padding: 12px;">
+          </div>
+        `;
+
+        filtered.forEach(item => {
+          const statusClass = item.status === 'claimed' ? 'claimed' : (item.status === 'closed' ? 'closed' : '');
+          html += `
+            <div class="card" style="cursor:pointer;" onclick="selectItem('${item.id}')">
+              <div class="flex-row" style="justify-content:space-between;">
+                <span><strong>${item.itemName}</strong> (${item.category})</span>
+                <span class="status ${statusClass}">${item.status}</span>
+              </div>
+              <div class="flex-row" style="font-size:0.9rem; color:#3a546d;">
+                <span><i class="fas fa-map-pin"></i> ${item.location}</span>
+                <span><i class="far fa-calendar"></i> ${item.date}</span>
+              </div>
+              <p style="margin-top: 6px;">${item.description.substring(0,60)}…</p>
+              <div class="flex-row" style="justify-content: space-between; margin-top: 8px;">
+                <span><i class="fas fa-user"></i> ${item.userName} ${item.userId==='u1'?'⭐':''}</span>
+                <span>${item.type === 'lost' ? '🔍 Lost' : '📍 Found'}</span>
+              </div>
+            </div>
+          `;
+        });
+
+        contentArea.innerHTML = html;
+
+        // attach filter listeners
+        document.getElementById('filterType')?.addEventListener('change', (e) => { filterType = e.target.value; renderHome(); });
+        document.getElementById('filterCategory')?.addEventListener('change', (e) => { filterCategory = e.target.value; renderHome(); });
+        document.getElementById('filterLocation')?.addEventListener('input', (e) => { filterLocation = e.target.value; renderHome(); });
+      }
+
+      // item detail with claim / message simulation
+      window.selectItem = (id) => {
+        selectedItemId = id;
+        currentPage = 'item-detail';
+        updateContent();
+      };
+
+      function renderItemDetail(id) {
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+        const isFinder = item.userId === currentUser.id;
+        const isClaimant = item.claimantId === currentUser.id;
+        const canClaim = (item.type === 'found' && item.status === 'open' && !isFinder);
+
+        let claimSection = '';
+        if (canClaim) {
+          claimSection = `
+            <div class="card">
+              <h4>Claim this item</h4>
+              <textarea id="claimMsg" placeholder="Describe unique feature to verify..." rows="2"></textarea>
+              <button class="small" onclick="submitClaim('${item.id}')">Submit claim</button>
+            </div>
+          `;
+        } else if (item.status === 'claimed' && (isFinder || currentUser.isAdmin)) {
+          claimSection = `<p>Claimed by ${item.claimantName}. Verification: "${item.verificationMsg}"</p>`;
+          if (isFinder || currentUser.isAdmin) {
+            claimSection += `<button class="small" onclick="closeItemFn('${item.id}')">Mark as closed (handed over)</button>`;
+          }
+        }
+
+        // conversation simulation
+        const itemMessages = messages.filter(m => m.itemId === item.id).slice(-3);
+        const chatHtml = itemMessages.map(m => {
+          const isMe = m.from === currentUser.id;
+          return `<div class="message-bubble ${isMe ? 'me' : ''}">${m.text}</div>`;
+        }).join('');
+
+        const adminActions = currentUser.isAdmin ? `<button class="small secondary" onclick="deleteItemFn('${item.id}')">🗑️ Delete (admin)</button>` : '';
+
+        contentArea.innerHTML = `
+          <button class="secondary small" onclick="navigateTo('home')"><i class="fas fa-arrow-left"></i> Back</button>
+          <div class="card" style="margin-top: 16px;">
+            <h2>${item.itemName}</h2>
+            <p><strong>Category:</strong> ${item.category}</p>
+            <p><strong>Location:</strong> ${item.location}</p>
+            <p><strong>Date:</strong> ${item.date}</p>
+            <p><strong>Description:</strong> ${item.description}</p>
+            <p><strong>Reporter:</strong> ${item.userName} ${item.userId==='u1'?'✅ verified':''}</p>
+            <span class="badge">${item.type}</span> <span class="status ${item.status}">${item.status}</span>
+          </div>
+          ${claimSection}
+          <div class="card">
+            <h4>💬 Messages / updates</h4>
+            <div style="margin-bottom: 8px;">${chatHtml || '<p class="small-note">No messages yet</p>'}</div>
+            <textarea id="newMsg" placeholder="Write a message..."></textarea>
+            <button class="small" onclick="sendMessage('${item.id}')">Send</button>
+          </div>
+          ${adminActions}
+        `;
+      }
+
+      // claim submission
+      window.submitClaim = (itemId) => {
+        const msg = document.getElementById('claimMsg')?.value;
+        if (!msg) return alert('Please enter a verification detail');
+        claimItem(itemId, msg);
+      };
+
+      window.closeItemFn = closeItem;
+      window.deleteItemFn = deleteItem;
+
+      window.sendMessage = (itemId) => {
+        const txt = document.getElementById('newMsg')?.value;
+        if (!txt) return;
+        const otherUser = items.find(i => i.id === itemId)?.userId === currentUser.id ?
+            items.find(i => i.id === itemId)?.claimantId : items.find(i => i.id === itemId)?.userId;
+        messages.push({
+          id: 'm'+Date.now(),
+          itemId: itemId,
+          from: currentUser.id,
+          to: otherUser,
+          text: txt,
+          timestamp: Date.now()
+        });
+        renderItemDetail(itemId);
+      };
+
+      function renderReportMenu() {
+        contentArea.innerHTML = `
+          <h3>What would you like to report?</h3>
+          <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button style="flex:1;" onclick="navigateTo('report-lost')"><i class="fas fa-search"></i> Lost item</button>
+            <button style="flex:1;" onclick="navigateTo('report-found')"><i class="fas fa-hand-holding-heart"></i> Found item</button>
+          </div>
+          <hr>
+          <p class="small-note">Help the community — every report is matched smartly.</p>
+        `;
+      }
+
+      function renderReportForm(type) {
+        const title = type === 'lost' ? 'Report lost item' : 'Report found item';
+        contentArea.innerHTML = `
+          <button class="secondary small" onclick="navigateTo('report')"><i class="fas fa-arrow-left"></i> Back</button>
+          <h3 style="margin: 12px 0;">${title}</h3>
+          <div id="reportForm">
+            <label>Item name</label>
+            <input id="itemName" placeholder="e.g., Samsung phone" />
+            <label>Category</label>
+            <select id="category">
+              <option>Phone</option><option>ID</option><option>Wallet</option><option>Keys</option><option>Bag</option><option>Documents</option>
+            </select>
+            <label>Description</label>
+            <textarea id="description" rows="2"></textarea>
+            <label>Location</label>
+            <input id="location" placeholder="Nairobi, CBD" />
+            <label>Date</label>
+            <input type="date" id="date" value="${new Date().toISOString().split('T')[0]}" />
+            <label>Image (preview)</label>
+            <div class="image-preview" id="preview"><i class="fas fa-image"></i></div>
+            <input type="file" id="imageFile" accept="image/*" />
+            <button style="margin-top: 16px;" onclick="submitReport('${type}')">Submit report</button>
+          </div>
+        `;
+        document.getElementById('imageFile')?.addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+              document.getElementById('preview').innerHTML = `<img src="${ev.target.result}" />`;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      window.submitReport = (type) => {
+        const data = {
+          itemName: document.getElementById('itemName')?.value,
+          category: document.getElementById('category')?.value,
+          description: document.getElementById('description')?.value,
+          location: document.getElementById('location')?.value,
+          date: document.getElementById('date')?.value,
+          imagePreview: '📸' // mock
+        };
+        if (!data.itemName || !data.location) return alert('Please fill required fields');
+        addReport(type, data);
+      };
+
+      function renderMessages() {
+        // group by item
+        const conversations = {};
+        messages.forEach(m => { if (!conversations[m.itemId]) conversations[m.itemId] = []; conversations[m.itemId].push(m); });
+        let html = '<h3>Messages</h3>';
+        for (let itemId in conversations) {
+          const item = items.find(i => i.id === itemId);
+          if (!item) continue;
+          const last = conversations[itemId].slice(-1)[0];
+          html += `<div class="card" onclick="selectItem('${itemId}')">
+            <b>${item.itemName}</b> <span class="status">${item.status}</span>
+            <p class="small-note">${last.text.substring(0,30)}…</p>
+          </div>`;
+        }
+        contentArea.innerHTML = html || '<p class="small-note">No messages yet.</p>';
+      }
+
+      function renderProfile() {
+        contentArea.innerHTML = `
+          <h3>Profile</h3>
+          <div class="card">
+            <p><strong>${currentUser.name}</strong> ${currentUser.verified ? '✅ Verified' : ''}</p>
+            <p>Trust score: 98% <i class="fas fa-star verified"></i></p>
+            <p>Member since Feb 2025</p>
+            <button class="secondary small" onclick="logoutSim()">Log out</button>
+          </div>
+          <div class="card"><h4>Your reports</h4></div>
+        `;
+      }
+
+      function renderAdmin() {
+        if (!currentUser.isAdmin) return;
+        let html = '<h3>Admin dashboard</h3>';
+        items.forEach(item => {
+          html += `<div class="card" style="border-left: 4px solid ${item.type==='lost'?'#b85b14':'#2B7A78'}">
+            <div class="flex-row" style="justify-content:space-between;"><b>${item.itemName}</b> <span>${item.status}</span></div>
+            <p>${item.location} · ${item.userName}</p>
+            <div class="flex-row">
+              <button class="small" onclick="closeItemFn('${item.id}')">✓ Resolve</button>
+              <button class="small secondary" onclick="deleteItemFn('${item.id}')">✗ Remove</button>
+            </div>
+          </div>`;
+        });
+        contentArea.innerHTML = html;
+      }
+
+      // login simulation
+      document.getElementById('loginUserBtn').addEventListener('click', () => {
+        currentUser = users[0]; // John
+        loginOverlay.classList.add('hidden');
+        mainApp.style.display = 'flex';
+        navigateTo('home');
+      });
+      document.getElementById('loginAdminBtn').addEventListener('click', () => {
+        currentUser = users[1]; // Admin
+        loginOverlay.classList.add('hidden');
+        mainApp.style.display = 'flex';
+        navigateTo('admin');
+      });
+
+      window.navigateTo = navigateTo;
+      window.logoutSim = () => {
+        currentUser = null;
+        loginOverlay.classList.remove('hidden');
+        mainApp.style.display = 'none';
+      };
+
+      // bottom nav listeners
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.addEventListener('click', (e) => {
+          const page = el.dataset.page;
+          if (page === 'admin' && !currentUser?.isAdmin) return;
+          navigateTo(page);
+        });
+      });
+
+      // initialize
+      loginOverlay.classList.remove('hidden');
+      mainApp.style.display = 'none';
+    })();
+</script>
+</body>
+</html>

@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Clock;
+
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
@@ -36,21 +38,13 @@ public class ApplicationConfig {
     ) throws Exception {
         return configuration.getAuthenticationManager();
     }
+    @Bean
+    public Clock clock() {
+        return Clock.systemUTC();
+    }
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

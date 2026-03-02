@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>ReConnect · Gov‑Integrated Lost & Found</title>
+    <!-- Font Awesome & Google Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Inter', sans-serif;
+        }
+        body {
+          background: #f0f4f8;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          padding: 16px;
+        }
+        #app {
+          width: 100%;
+          max-width: 1300px;
+          background: white;
+          border-radius: 40px;
+          box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          height: 90vh;
+        }
+        /* top bar */
+        .top-bar {
+          padding: 20px 30px;
+          background: #ffffff;
+          border-bottom: 1px solid #e2e8f0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .logo {
+          font-weight: 700;
+          font-size: 1.8rem;
+          color: #0a2a44;
+        }
+        .logo span {
+          color: #1e7e6c;
+        }
+        .role-badge {
+          background: #eef2f6;
+          padding: 8px 20px;
+          border-radius: 40px;
+          font-weight: 600;
+          color: #1e293b;
+        }
+        /* main grid: left sidebar + right content */
+        .main-layout {
+          display: flex;
+          flex: 1;
+          overflow: hidden;
+        }
+        .sidebar {
+          width: 280px;
+          background: #f9fbfd;
+          border-right: 1px solid #e2e8f0;
+          padding: 24px 16px;
+          overflow-y: auto;
+        }
+        .sidebar h3 {
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: #64748b;
+          margin: 20px 0 8px 8px;
+        }
+        .role-menu {
+          list-style: none;
+        }
+        .role-menu li {
+          padding: 12px 16px;
+          margin: 4px 0;
+          border-radius: 12px;
+          font-weight: 500;
+          color: #334155;
+          cursor: pointer;
+          transition: 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .role-menu li i {
+          width: 24px;
+          color: #1e7e6c;
+        }
+        .role-menu li.active {
+          background: #1e7e6c;
+          color: white;
+        }
+        .role-menu li.active i {
+          color: white;
+        }
+        .content {
+          flex: 1;
+          padding: 24px 32px;
+          overflow-y: auto;
+          background: #ffffff;
+        }
+        /* cards */
+        .card {
+          background: #f9fbfd;
+          border-radius: 24px;
+          padding: 20px;
+          margin-bottom: 20px;
+          border: 1px solid #e9eef3;
+          box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+        .badge {
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 40px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          background: #e2e8f0;
+          color: #1e293b;
+        }
+        .badge.success { background: #d1fae5; color: #065f46; }
+        .badge.warning { background: #fef3c7; color: #92400e; }
+        .badge.info { background: #dbeafe; color: #1e40af; }
+        .badge.police { background: #c7d2fe; color: #3730a3; }
+        .button {
+          background: #1e7e6c;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 40px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: 0.15s;
+          font-size: 0.9rem;
+          border: 1px solid transparent;
+        }
+        .button.outline {
+          background: transparent;
+          border-color: #cbd5e1;
+          color: #1e293b;
+        }
+        .button.small {
+          padding: 6px 16px;
+          font-size: 0.8rem;
+        }
+        .button:active { opacity: 0.8; }
+        .flex-row {
+          display: flex;
+          gap: 16px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+        .item-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 16px;
+        }
+        .item-card {
+          background: white;
+          border-radius: 20px;
+          padding: 18px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .state-indicator {
+          display: inline-block;
+          width: 10px;
+          height: 10px;
+          border-radius: 10px;
+          margin-right: 6px;
+        }
+        /* chat panel */
+        .chat-panel {
+          background: #f1f5f9;
+          border-radius: 20px;
+          padding: 16px;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+        .message {
+          margin-bottom: 12px;
+          max-width: 80%;
+        }
+        .message.me {
+          margin-left: auto;
+          background: #1e7e6c;
+          color: white;
+          border-radius: 20px 20px 4px 20px;
+          padding: 10px 16px;
+        }
+        .message.other {
+          background: white;
+          border-radius: 20px 20px 20px 4px;
+          padding: 10px 16px;
+        }
+        /* design doc collapsible */
+        .doc-section {
+          background: #f1f5f9;
+          border-radius: 16px;
+          padding: 16px;
+          margin-top: 20px;
+          font-size: 0.85rem;
+        }
+        .doc-section summary {
+          font-weight: 700;
+          color: #0a2a44;
+          cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- top bar -->
+    <div class="top-bar">
+        <div class="logo">ReConnect<span>.</span></div>
+        <div class="role-badge" id="currentRoleDisplay">Not logged in</div>
+    </div>
+
+    <!-- main layout -->
+    <div class="main-layout">
+        <!-- left sidebar role selection -->
+        <div class="sidebar">
+            <h3>ACT AS</h3>
+            <ul class="role-menu">
+                <li id="roleLostUser" class=""><i class="fas fa-user"></i> Lost Item Reporter</li>
+                <li id="roleFoundUser" class=""><i class="fas fa-hand-holding-heart"></i> Found Item Reporter</li>
+                <li id="roleAdmin" class=""><i class="fas fa-shield-alt"></i> Admin</li>
+                <li id="rolePolice" class=""><i class="fas fa-gavel"></i> Police Officer</li>
+            </ul>
+            <h3>SYSTEM STATE</h3>
+            <div style="padding: 8px; background: #eef2f6; border-radius: 12px;">
+                <p><span class="state-indicator" style="background:#f59e0b;"></span> Pending approval</p>
+                <p><span class="state-indicator" style="background:#3b82f6;"></span> Approved</p>
+                <p><span class="state-indicator" style="background:#8b5cf6;"></span> Matched</p>
+                <p><span class="state-indicator" style="background:#10b981;"></span> Police received</p>
+                <p><span class="state-indicator" style="background:#6b7280;"></span> Closed</p>
+            </div>
+        </div>
+
+        <!-- dynamic content area -->
+        <div class="content" id="contentArea">
+            <!-- will be filled by JS -->
+        </div>
+    </div>
+</div>
+
+<!-- embedded system design documentation (hidden by default inside collapsible) -->
+<details style="max-width:1300px; margin:20px auto; background:white; border-radius:30px; padding:20px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.1);">
+    <summary style="font-weight:700; font-size:1.2rem; cursor:pointer; color:#1e7e6c;">📘 View Full System Design (Database, States, Permissions, Risks)</summary>
+    <div style="margin-top:20px; max-height:400px; overflow-y:auto; padding:10px; background:#f8fafc; border-radius:16px;">
+        <h3>Database Structure (Key Collections)</h3>
+        <pre style="background:#1e293b; color:#e2e8f0; padding:16px; border-radius:12px;">
+users: {
+  id, name, email, role (citizen, admin, police), trustScore (0-100), verifiedBadge, createdAt
+}
+items: {
+  id, type: 'lost'|'found', userId, userName,
+  title, description, category, location, imageUrl,
+  status: 'submitted'|'approved'|'matched'|'police_received'|'payment_pending'|'closed',
+  adminApproved: bool, createdAt
+}
+matches: {
+  id, lostItemId, foundItemId, matchedByAdminId,
+  status: 'pending'|'confirmed'|'police_received'|'payment_pending'|'payment_confirmed'|'handover_done'|'closed',
+  policeConfirmedAt, controlNumber, paymentConfirmedAt, closedAt
+}
+messages: {
+  id, matchId, fromUserId, toUserId, text, timestamp, isVerificationRequest
+}
+payments: {
+  matchId, controlNumber, amount=1000, status: 'pending'|'paid', paidAt
+}
+auditLogs: {
+  userId, action, timestamp, details
+}
+    </pre>
+        <h3>Role Permissions Matrix</h3>
+        <table style="width:100%; border-collapse:collapse;">
+            <tr><th>Action</th><th>Citizen</th><th>Admin</th><th>Police</th></tr>
+            <tr><td>Submit lost/found</td><td>✅</td><td>✅</td><td>✅</td></tr>
+            <tr><td>Approve items</td><td>❌</td><td>✅</td><td>❌</td></tr>
+            <tr><td>Match items</td><td>❌</td><td>✅</td><td>❌</td></tr>
+            <tr><td>Chat with finder (verification)</td><td>❌</td><td>✅</td><td>❌</td></tr>
+            <tr><td>Confirm police receipt</td><td>❌</td><td>❌</td><td>✅</td></tr>
+            <tr><td>Generate control number</td><td>❌</td><td>❌</td><td>✅</td></tr>
+            <tr><td>Confirm payment</td><td>❌</td><td>❌</td><td>✅</td></tr>
+            <tr><td>Release item</td><td>❌</td><td>❌</td><td>✅</td></tr>
+            <tr><td>View audit logs</td><td>❌</td><td>✅</td><td>✅</td></tr>
+        </table>
+        <h3>State Transition Diagram</h3>
+        <p><strong>LOST_SUBMITTED</strong> → (admin approves) → <strong>ADMIN_APPROVED_LOST</strong><br>
+            <strong>FOUND_SUBMITTED</strong> → (admin approves + chat) → <strong>ADMIN_APPROVED_FOUND</strong><br>
+            Admin manually links approved lost & found → <strong>MATCH_PENDING</strong> → (admin confirms after verification) → <strong>MATCH_CONFIRMED</strong><br>
+            Police receives item → <strong>POLICE_RECEIVED_ITEM</strong><br>
+            Police generates control number → <strong>PAYMENT_PENDING</strong><br>
+            Lost user pays (via control number) → <strong>PAYMENT_CONFIRMED</strong><br>
+            Police hands over item → <strong>HANDOVER_COMPLETED</strong> → <strong>CLOSED</strong></p>
+        <h3>Fraud Prevention & Edge Cases</h3>
+        <ul>
+            <li>Only admin can approve items after verifying images/descriptions.</li>
+            <li>Found user must chat with admin to prove legitimacy.</li>
+            <li>Multiple claims on same item: admin chooses one match, others are rejected.</li>
+            <li>Dispute resolution: user can flag; admin investigates using audit logs.</li>
+            <li>Trust score increases by +5 for successful recovery, -10 for fake report.</li>
+            <li>Police verify ID before handover.</li>
+        </ul>
+        <h3>Monetization & Scalability</h3>
+        <p>1000 TZS per successful recovery. Partnerships with government for nationwide rollout. Use cloud functions for async matching, CDN for images, read replicas for high traffic.</p>
+        <h3>Security & Compliance</h3>
+        <p>All images scanned for inappropriate content. HTTPS, audit trails, role-based access control. Data encryption at rest. Compliance with local data protection laws.</p>
+    </div>
+</details>
+
+<script>
+    (function() {
+      // ---------- MOCK DATABASE (scalable structure) ----------
+      const db = {
+        users: [
+          { id: 'u1', name: 'John Doe', role: 'citizen', trustScore: 82, verified: true },
+          { id: 'u2', name: 'Mary Wanjiku', role: 'citizen', trustScore: 65, verified: false },
+          { id: 'admin1', name: 'Admin Reuben', role: 'admin', trustScore: 100, verified: true },
+          { id: 'police1', name: 'Inspector Mwangi', role: 'police', trustScore: 100, verified: true }
+        ],
+        items: [
+          { id: 'lost1', type: 'lost', userId: 'u1', userName: 'John Doe', title: 'Blue Samsung Phone', category: 'Phone', description: 'Samsung A12 with blue case', location: 'Nairobi CBD', image: '📱', status: 'submitted', adminApproved: false, createdAt: '2025-02-20' },
+          { id: 'found1', type: 'found', userId: 'u2', userName: 'Mary Wanjiku', title: 'Samsung Phone', category: 'Phone', description: 'Found near bus stop, blue case', location: 'Nairobi CBD', image: '📱', status: 'submitted', adminApproved: false, createdAt: '2025-02-21' }
+        ],
+        matches: [
+          // example match: { id, lostItemId, foundItemId, status, controlNumber, policeNotes }
+        ],
+        messages: [
+          { id: 'msg1', matchId: null, fromUserId: 'u2', toUserId: 'admin1', text: 'I found this phone at the bus stop. Here is a photo.', timestamp: Date.now() - 3600000, itemId: 'found1' }
+        ],
+        auditLogs: [],
+        // helpers
+        addItem(item) { this.items.push(item); return item; },
+        updateItem(id, updates) { const idx = this.items.findIndex(i => i.id === id); if (idx>=0) Object.assign(this.items[idx], updates); },
+        addMatch(match) { this.matches.push(match); return match; },
+        updateMatch(id, updates) { const idx = this.matches.findIndex(m => m.id === id); if (idx>=0) Object.assign(this.matches[idx], updates); },
+        addMessage(msg) { this.messages.push(msg); },
+        logAction(userId, action, details) { this.auditLogs.push({ userId, action, details, timestamp: new Date().toISOString() }); }
+      };
+
+      // ---------- current session ----------
+      let currentUser = { id: 'u1', name: 'John Doe', role: 'citizen', trustScore: 82 }; // default, but will be set by role click
+
+      // ---------- UI helpers ----------
+      function showToast(msg) { alert(msg); } // simplified
+
+      // render based on role
+      function renderContent() {
+        const role = currentUser.role;
+        let html = '';
+        if (role === 'citizen') {
+          // Show both lost and found forms + their items
+          const myItems = db.items.filter(i => i.userId === currentUser.id);
+          html = `
+            <h2>Welcome, ${currentUser.name} (trust ${currentUser.trustScore})</h2>
+            <div class="flex-row" style="margin: 24px 0;">
+              <button class="button" onclick="showLostForm()">➕ Report Lost Item</button>
+              <button class="button outline" onclick="showFoundForm()">➕ Report Found Item</button>
+            </div>
+            <h3>My reports</h3>
+            <div class="item-grid">
+              ${myItems.map(item => `
+                <div class="item-card">
+                  <div><strong>${item.title}</strong> (${item.type})</div>
+                  <div class="badge ${item.adminApproved ? 'success' : 'warning'}">${item.adminApproved ? 'Approved' : 'Pending approval'}</div>
+                  <p>${item.location}</p>
+                  <p style="font-size:0.8rem;">Status: ${item.status}</p>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        } else if (role === 'admin') {
+          const pendingLost = db.items.filter(i => i.type === 'lost' && !i.adminApproved);
+          const pendingFound = db.items.filter(i => i.type === 'found' && !i.adminApproved);
+          const approvedLost = db.items.filter(i => i.type === 'lost' && i.adminApproved && !db.matches.some(m => m.lostItemId === i.id));
+          const approvedFound = db.items.filter(i => i.type === 'found' && i.adminApproved && !db.matches.some(m => m.foundItemId === i.id));
+          const matchesPending = db.matches.filter(m => m.status === 'pending');
+          html = `
+            <h2>Admin Dashboard</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+              <div class="card">
+                <h3>Pending Lost (${pendingLost.length})</h3>
+                ${pendingLost.map(l => `
+                  <div style="border-bottom:1px solid #ddd; padding:10px 0;">
+                    <p><strong>${l.title}</strong> by ${l.userName}</p>
+                    <button class="button small" onclick="approveItem('${l.id}')">Approve</button>
+                  </div>`).join('')}
+              </div>
+              <div class="card">
+                <h3>Pending Found (${pendingFound.length})</h3>
+                ${pendingFound.map(f => `
+                  <div style="border-bottom:1px solid #ddd; padding:10px 0;">
+                    <p><strong>${f.title}</strong> by ${f.userName}</p>
+                    <button class="button small" onclick="openFoundChat('${f.id}')">Verify via Chat</button>
+                  </div>`).join('')}
+              </div>
+            </div>
+            <div class="card">
+              <h3>Match Approved Items</h3>
+              <div style="display:flex; gap:20px;">
+                <div style="flex:1">
+                  <h4>Approved Lost</h4>
+                  ${approvedLost.map(l => `<div><input type="radio" name="lostRadio" value="${l.id}"> ${l.title}</div>`).join('')}
+                </div>
+                <div style="flex:1">
+                  <h4>Approved Found</h4>
+                  ${approvedFound.map(f => `<div><input type="radio" name="foundRadio" value="${f.id}"> ${f.title}</div>`).join('')}
+                </div>
+              </div>
+              <button class="button small" onclick="createMatch()">Create Match</button>
+            </div>
+            <div class="card">
+              <h3>Pending Matches (awaiting confirmation)</h3>
+              ${matchesPending.map(m => {
+                const lost = db.items.find(i => i.id === m.lostItemId);
+                const found = db.items.find(i => i.id === m.foundItemId);
+                return `<div>${lost?.title} ↔ ${found?.title} <button class="button small" onclick="confirmMatch('${m.id}')">Confirm Match</button></div>`;
+              }).join('')}
+            </div>
+          `;
+        } else if (role === 'police') {
+          const matchesToReceive = db.matches.filter(m => m.status === 'confirmed');
+          const matchesReceived = db.matches.filter(m => m.status === 'police_received' || m.status === 'payment_pending' || m.status === 'payment_confirmed');
+          html = `
+            <h2>Police Officer Dashboard</h2>
+            <div class="card">
+              <h3>Confirmed Matches Awaiting Item Receipt</h3>
+              ${matchesToReceive.map(m => {
+                const lost = db.items.find(i => i.id === m.lostItemId);
+                const found = db.items.find(i => i.id === m.foundItemId);
+                return `
+                  <div style="border-bottom:1px solid #ccc; padding:10px;">
+                    <p><strong>${lost?.title}</strong> (lost) ↔ <strong>${found?.title}</strong> (found)</p>
+                    <button class="button small" onclick="policeReceiveItem('${m.id}')">📦 Item Received</button>
+                  </div>`;
+              }).join('')}
+            </div>
+            <div class="card">
+              <h3>Items at Police Station</h3>
+              ${matchesReceived.map(m => {
+                const lost = db.items.find(i => i.id === m.lostItemId);
+                return `
+                  <div style="border-bottom:1px solid #ccc; padding:10px;">
+                    <p>${lost?.title} - Control #: ${m.controlNumber || 'N/A'}</p>
+                    ${m.status === 'police_received' ? `<button class="button small" onclick="generateControl('${m.id}')">🔢 Generate Control Number</button>` : ''}
+                    ${m.status === 'payment_pending' ? `<button class="button small" onclick="confirmPayment('${m.id}')">💰 Confirm Payment</button>` : ''}
+                    ${m.status === 'payment_confirmed' ? `<button class="button small" onclick="handoverItem('${m.id}')">✅ Handover to Owner</button>` : ''}
+                  </div>`;
+              }).join('')}
+            </div>
+          `;
+        }
+
+        document.getElementById('contentArea').innerHTML = html;
+        document.getElementById('currentRoleDisplay').innerText = `${currentUser.name} (${currentUser.role})`;
+      }
+
+      // ---------- action functions (exposed globally) ----------
+      window.showLostForm = function() {
+        const formHtml = `
+          <div style="background:white; padding:20px; border-radius:24px;">
+            <h3>Report Lost Item</h3>
+            <input id="lostTitle" placeholder="Item title" class="full-width" style="width:100%; padding:12px; margin:8px 0;">
+            <select id="lostCategory" style="width:100%; padding:12px;">
+              <option>Phone</option><option>ID</option><option>Wallet</option><option>Keys</option><option>Bag</option>
+            </select>
+            <textarea id="lostDesc" placeholder="Description" rows="3" style="width:100%; padding:12px;"></textarea>
+            <input id="lostLocation" placeholder="Location" style="width:100%; padding:12px;">
+            <button class="button" onclick="submitLostItem()">Submit</button>
+          </div>
+        `;
+        document.getElementById('contentArea').innerHTML = formHtml;
+      };
+
+      window.submitLostItem = function() {
+        const newItem = {
+          id: 'lost' + Date.now(),
+          type: 'lost',
+          userId: currentUser.id,
+          userName: currentUser.name,
+          title: document.getElementById('lostTitle').value,
+          category: document.getElementById('lostCategory').value,
+          description: document.getElementById('lostDesc').value,
+          location: document.getElementById('lostLocation').value,
+          image: '📦',
+          status: 'submitted',
+          adminApproved: false,
+          createdAt: new Date().toISOString().split('T')[0]
+        };
+        db.addItem(newItem);
+        db.logAction(currentUser.id, 'SUBMIT_LOST', newItem.id);
+        showToast('Lost item submitted for admin approval');
+        renderContent();
+      };
+
+      window.showFoundForm = function() {
+        const formHtml = `
+          <div style="background:white; padding:20px; border-radius:24px;">
+            <h3>Report Found Item</h3>
+            <input id="foundTitle" placeholder="Item title" style="width:100%; padding:12px; margin:8px 0;">
+            <select id="foundCategory" style="width:100%; padding:12px;">
+              <option>Phone</option><option>ID</option><option>Wallet</option><option>Keys</option><option>Bag</option>
+            </select>
+            <textarea id="foundDesc" placeholder="Description" rows="3" style="width:100%; padding:12px;"></textarea>
+            <input id="foundLocation" placeholder="Location" style="width:100%; padding:12px;">
+            <button class="button" onclick="submitFoundItem()">Submit</button>
+          </div>
+        `;
+        document.getElementById('contentArea').innerHTML = formHtml;
+      };
+
+      window.submitFoundItem = function() {
+        const newItem = {
+          id: 'found' + Date.now(),
+          type: 'found',
+          userId: currentUser.id,
+          userName: currentUser.name,
+          title: document.getElementById('foundTitle').value,
+          category: document.getElementById('foundCategory').value,
+          description: document.getElementById('foundDesc').value,
+          location: document.getElementById('foundLocation').value,
+          image: '📦',
+          status: 'submitted',
+          adminApproved: false,
+          createdAt: new Date().toISOString().split('T')[0]
+        };
+        db.addItem(newItem);
+        db.logAction(currentUser.id, 'SUBMIT_FOUND', newItem.id);
+        showToast('Found item submitted. Admin will contact you for verification.');
+        renderContent();
+      };
+
+      window.approveItem = function(itemId) {
+        db.updateItem(itemId, { adminApproved: true, status: 'approved' });
+        db.logAction(currentUser.id, 'APPROVE_ITEM', itemId);
+        showToast('Item approved');
+        renderContent();
+      };
+
+      window.openFoundChat = function(itemId) {
+        const item = db.items.find(i => i.id === itemId);
+        const chatMsgs = db.messages.filter(m => m.itemId === itemId);
+        const chatHtml = `
+          <div>
+            <h3>Chat with ${item.userName} about ${item.title}</h3>
+            <div class="chat-panel" style="height:200px; overflow-y:auto;">
+              ${chatMsgs.map(m => `<div class="message other">${m.text}</div>`).join('')}
+            </div>
+            <textarea id="adminMsg" placeholder="Ask for verification details..." rows="2" style="width:100%; margin-top:8px;"></textarea>
+            <button class="button small" onclick="sendAdminMessage('${itemId}')">Send & Verify</button>
+            <button class="button small outline" onclick="approveItem('${itemId}')">✔ Approve after verification</button>
+          </div>
+        `;
+        document.getElementById('contentArea').innerHTML = chatHtml;
+      };
+
+      window.sendAdminMessage = function(itemId) {
+        const msg = document.getElementById('adminMsg').value;
+        db.addMessage({ id: 'msg'+Date.now(), matchId: null, fromUserId: currentUser.id, toUserId: db.items.find(i=>i.id===itemId).userId, text: msg, timestamp: Date.now(), itemId });
+        showToast('Message sent');
+        openFoundChat(itemId); // refresh
+      };
+
+      window.createMatch = function() {
+        const lostRadio = document.querySelector('input[name="lostRadio"]:checked');
+        const foundRadio = document.querySelector('input[name="foundRadio"]:checked');
+        if (!lostRadio || !foundRadio) return alert('Select both a lost and found item');
+        const match = {
+          id: 'match'+Date.now(),
+          lostItemId: lostRadio.value,
+          foundItemId: foundRadio.value,
+          status: 'pending',
+          createdBy: currentUser.id,
+          createdAt: new Date().toISOString()
+        };
+        db.addMatch(match);
+        db.logAction(currentUser.id, 'CREATE_MATCH', match.id);
+        showToast('Match created. Now confirm after verification.');
+        renderContent();
+      };
+
+      window.confirmMatch = function(matchId) {
+        db.updateMatch(matchId, { status: 'confirmed' });
+        db.logAction(currentUser.id, 'CONFIRM_MATCH', matchId);
+        showToast('Match confirmed. Police will be notified.');
+        renderContent();
+      };
+
+      window.policeReceiveItem = function(matchId) {
+        db.updateMatch(matchId, { status: 'police_received', policeReceivedAt: new Date().toISOString() });
+        db.logAction(currentUser.id, 'POLICE_RECEIVE', matchId);
+        showToast('Item received at police station.');
+        renderContent();
+      };
+
+      window.generateControl = function(matchId) {
+        const control = 'TZ' + Math.floor(100000 + Math.random()*900000);
+        db.updateMatch(matchId, { status: 'payment_pending', controlNumber: control });
+        db.logAction(currentUser.id, 'GENERATE_CONTROL', matchId);
+        showToast(`Control number ${control} generated.`);
+        renderContent();
+      };
+
+      window.confirmPayment = function(matchId) {
+        db.updateMatch(matchId, { status: 'payment_confirmed' });
+        db.logAction(currentUser.id, 'PAYMENT_CONFIRMED', matchId);
+        // increase trust score for both parties
+        const match = db.matches.find(m => m.id === matchId);
+        const lostItem = db.items.find(i => i.id === match.lostItemId);
+        const foundItem = db.items.find(i => i.id === match.foundItemId);
+        if (lostItem) {
+          const user = db.users.find(u => u.id === lostItem.userId);
+          if (user) user.trustScore = Math.min(100, user.trustScore + 5);
+        }
+        if (foundItem) {
+          const user = db.users.find(u => u.id === foundItem.userId);
+          if (user) user.trustScore = Math.min(100, user.trustScore + 5);
+        }
+        showToast('Payment confirmed. Ready for handover.');
+        renderContent();
+      };
+
+      window.handoverItem = function(matchId) {
+        db.updateMatch(matchId, { status: 'closed' });
+        db.logAction(currentUser.id, 'HANDOVER_COMPLETED', matchId);
+        showToast('Item handed over. Case closed.');
+        renderContent();
+      };
+
+      // role switching
+      document.getElementById('roleLostUser').addEventListener('click', () => {
+        currentUser = db.users.find(u => u.id === 'u1');
+        renderContent();
+        setActiveRole('roleLostUser');
+      });
+      document.getElementById('roleFoundUser').addEventListener('click', () => {
+        currentUser = db.users.find(u => u.id === 'u2');
+        renderContent();
+        setActiveRole('roleFoundUser');
+      });
+      document.getElementById('roleAdmin').addEventListener('click', () => {
+        currentUser = db.users.find(u => u.id === 'admin1');
+        renderContent();
+        setActiveRole('roleAdmin');
+      });
+      document.getElementById('rolePolice').addEventListener('click', () => {
+        currentUser = db.users.find(u => u.id === 'police1');
+        renderContent();
+        setActiveRole('rolePolice');
+      });
+
+      function setActiveRole(activeId) {
+        document.querySelectorAll('.role-menu li').forEach(li => li.classList.remove('active'));
+        document.getElementById(activeId).classList.add('active');
+      }
+
+      // initial render with default user
+      setActiveRole('roleLostUser');
+      renderContent();
+
+      // expose for debugging
+      window.db = db;
+    })();
+</script>
+</body>
+</html>

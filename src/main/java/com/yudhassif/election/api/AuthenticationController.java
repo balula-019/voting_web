@@ -34,12 +34,20 @@ public class AuthenticationController {
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         services.refreshToken(request, response);
     }
-   @PutMapping("/activate")
+   @PostMapping("/activate")
 //   @PreAuthorize("hasRole('STUDENT')") // is not needed
    public ResponseEntity<Void> activateStudent(@Valid @RequestBody ActivateAccountRequest request){
         services.activateStudent(request);
        return ResponseEntity.accepted().build();
    }
+    @PostMapping("/resend-activation")
+    public ResponseEntity<String> resendActivation(
+            @RequestParam String email
+    ) {
+        String token = studentService.resendActivationToken(email);
+
+        return ResponseEntity.ok("New activation token: " + token);
+    }
 
    // the technic here is to implement interface called dashboard response then to implement as admin and student in its own
 //   @PreAuthorize("hasRole('STUDENT') and hasAuthority('DASHBOARD_VIEW')")

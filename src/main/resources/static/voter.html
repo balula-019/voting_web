@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Council · Secure Voting</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        :root {
+            /* Light mode - premium neutral palette */
+            --bg-primary: #f8fafd;
+            --bg-card: #ffffff;
+            --bg-surface: #f1f4f9;
+            --bg-surface-hover: #e9eef4;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --accent-primary: #2563eb;
+            --accent-secondary: #3b82f6;
+            --accent-glow: rgba(37, 99, 235, 0.15);
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 40px -12px rgba(0, 20, 40, 0.2);
+            --success: #059669;
+            --success-bg: #ecfdf5;
+            --error: #dc2626;
+            --error-bg: #fef2f2;
+            --warning: #d97706;
+            --warning-bg: #fffbeb;
+            --timer-color: #b91c1c;
+            --disabled-opacity: 0.5;
+            --disabled-bg: #e5e7eb;
+        }
+
+        [data-theme="dark"] {
+            /* Dark mode - sophisticated deep theme */
+            --bg-primary: #0b1120;
+            --bg-card: #1a2332;
+            --bg-surface: #232e41;
+            --bg-surface-hover: #2d3a4f;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #3b82f6;
+            --accent-glow: rgba(96, 165, 250, 0.2);
+            --border-light: #334155;
+            --border-medium: #475569;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+            --success: #34d399;
+            --success-bg: #1e3a2f;
+            --error: #f87171;
+            --error-bg: #3b1e1e;
+            --warning: #fbbf24;
+            --warning-bg: #3b2e1e;
+            --timer-color: #fca5a5;
+            --disabled-opacity: 0.4;
+            --disabled-bg: #2d3748;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 100;
+        }
+
+        .theme-toggle button {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 40px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(8px);
+            transition: all 0.2s;
+        }
+
+        .theme-toggle button:hover {
+            background: var(--bg-surface);
+            border-color: var(--accent-primary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Main Container */
+        .voting-container {
+            max-width: 1000px;
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: 40px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+        }
+
+        /* Header with Gradient */
+        .header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            padding: 2.5rem 2.5rem 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(100px, -100px);
+        }
+
+        .greeting {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+            position: relative;
+        }
+
+        .greeting span {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(4px);
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .election-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(4px);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 2.5rem;
+        }
+
+        /* Vote Now Button - Premium Style */
+        .vote-now-btn {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 1.2rem 2rem;
+            border-radius: 60px;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px -4px var(--accent-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .vote-now-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 24px -6px var(--accent-glow);
+        }
+
+        .vote-now-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .vote-now-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: var(--text-tertiary);
+        }
+
+        /* Notification Card */
+        .notification-card {
+            background: var(--bg-surface);
+            border-radius: 24px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .voter-id-section {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .voter-id-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-tertiary);
+        }
+
+        .voter-id-value {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--bg-card);
+            padding: 0.4rem 1.5rem;
+            border-radius: 60px;
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+            letter-spacing: 2px;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .copy-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: 40px;
+            padding: 0.6rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            border-color: var(--accent-primary);
+            background: var(--bg-surface-hover);
+        }
+
+        .expiry-badge {
+            background: var(--warning-bg);
+            color: var(--warning);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        /* Activation Panel */
+        .activation-panel {
+            background: var(--bg-surface);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border-light);
+            border-radius: 60px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .activate-btn {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .activate-btn:hover:not(:disabled) {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px var(--accent-glow);
+        }
+
+        .activate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Timer Bar */
+        .timer-bar {
+            background: var(--bg-surface);
+            border-radius: 60px;
+            padding: 1rem 2rem;
+            margin: 2rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid var(--border-light);
+        }
+
+        .timer-display {
+            font-family: monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--timer-color);
+            background: var(--bg-card);
+            padding: 0.3rem 1.5rem;
+            border-radius: 40px;
+            letter-spacing: 2px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Candidates Grid */
+        .candidates-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .position-section {
+            background: var(--bg-surface);
+            border-radius: 28px;
+            padding: 2rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .position-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--accent-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--border-light);
+            padding-bottom: 1rem;
+        }
+
+        .candidate-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .candidate-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 2px solid var(--border-light);
+            transition: all 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .candidate-card.disabled {
+            opacity: var(--disabled-opacity);
+            cursor: not-allowed;
+            pointer-events: none;
+            background: var(--disabled-bg);
+            border-color: var(--border-medium);
+        }
+
+        .candidate-card:not(.disabled):hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .candidate-card.selected {
+            border-color: var(--accent-primary);
+            background: var(--accent-glow);
+            box-shadow: 0 0 0 3px var(--accent-primary);
+        }
+
+        .candidate-image {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--border-light);
+            background: var(--bg-surface);
+            box-shadow: var(--shadow-md);
+        }
+
+        .candidate-card.selected .candidate-image {
+            border-color: var(--accent-primary);
+        }
+
+        .candidate-info {
+            flex: 1;
+            width: 100%;
+        }
+
+        .candidate-name {
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 0.3rem;
+            color: var(--text-primary);
+        }
+
+        .candidate-position {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-weight: 500;
+        }
+
+        .checkbox-custom {
+            width: 32px;
+            height: 32px;
+            border: 2px solid var(--border-medium);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background: var(--bg-card);
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .candidate-card.selected .checkbox-custom {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            transform: scale(1.1);
+        }
+
+        .checkbox-custom svg {
+            width: 20px;
+            height: 20px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .candidate-card.selected .checkbox-custom svg {
+            opacity: 1;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            background: linear-gradient(135deg, var(--success), #10b981);
+            color: white;
+            border: none;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 1.2rem 3rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            display: block;
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 24px rgba(5, 150, 105, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Message Styles */
+        .message {
+            margin-top: 1.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: 60px;
+            font-weight: 500;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.success {
+            background: var(--success-bg);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .message.error {
+            background: var(--error-bg);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .message.warning {
+            background: var(--warning-bg);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .content { padding: 1.5rem; }
+            .header { padding: 1.5rem; }
+            .input-group { flex-direction: column; }
+            .voter-id-section { flex-direction: column; align-items: flex-start; }
+            .candidate-cards { grid-template-columns: 1fr; }
+            .candidate-image {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        /* Lock Icon for Disabled State */
+        .lock-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: var(--text-tertiary);
+            font-size: 1.2rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body data-theme="light">
+<div class="theme-toggle">
+    <button id="themeToggleBtn">
+        <span>🌙</span>
+        <span>Dark Mode</span>
+    </button>
+</div>
+
+<div class="voting-container">
+    <div class="header">
+        <div class="greeting">
+            Welcome back, <span id="studentName">Yussuf</span>
+        </div>
+        <div class="election-badge">
+            🗳️ Student Council Election 2025 · Secure Voting
+        </div>
+    </div>
+
+    <div class="content" id="app">
+        <!-- Vote Now Button -->
+        <button class="vote-now-btn" id="voteNowBtn">
+            <span>🗳️</span>
+            Start Voting Process
+        </button>
+
+        <!-- Voter ID Notification -->
+        <div id="notificationPanel" class="notification-card hidden">
+            <div class="voter-id-label">Your Voter Identification</div>
+            <div class="voter-id-section">
+                <span id="voterIdDisplay" class="voter-id-value">XXXX-XXXX</span>
+                <button class="copy-btn" id="copyVoterIdBtn">
+                    <span>📋</span> Copy ID
+                </button>
+                <span class="expiry-badge">
+                        <span>⏳</span> Expires in 7 minutes
+                    </span>
+            </div>
+        </div>
+
+        <!-- Activation Panel -->
+        <div id="activationPanel" class="activation-panel hidden">
+            <div style="font-weight: 600; font-size: 1.1rem;">🔐 Activate Your Voting Session</div>
+            <div class="input-group">
+                <input type="text" id="voterIdInput" class="input-field"
+                       placeholder="Enter your voter ID (e.g., VID-7X92)" autocomplete="off">
+                <button class="activate-btn" id="activateBtn" disabled>
+                    Activate Session
+                </button>
+            </div>
+            <div id="activationError" class="message error hidden"></div>
+        </div>
+
+        <!-- Timer Bar -->
+        <div id="timerBar" class="timer-bar hidden">
+            <span style="font-weight: 500;">⏱️ Voting session active</span>
+            <span id="timerDisplay" class="timer-display">07:00</span>
+        </div>
+
+        <!-- Voting Panel with Candidates -->
+        <div id="votingPanel" class="candidates-grid">
+            <!-- Dynamically populated -->
+        </div>
+
+        <!-- Submit Area -->
+        <div id="submitArea" class="hidden" style="text-align: center; margin-top: 2rem;">
+            <button class="submit-btn" id="submitVoteBtn" disabled>
+                Submit Your Vote
+            </button>
+            <div id="globalMessage" class="message hidden"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Theme Management
+        const themeToggle = document.getElementById('themeToggleBtn');
+        const body = document.body;
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        body.setAttribute('data-theme', savedTheme);
+        updateThemeButton(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeButton(newTheme);
+        });
+
+        function updateThemeButton(theme) {
+            const btn = themeToggle.querySelector('span:first-child');
+            const text = themeToggle.querySelector('span:last-child');
+            if (theme === 'dark') {
+                btn.textContent = '☀️';
+                text.textContent = 'Light Mode';
+            } else {
+                btn.textContent = '🌙';
+                text.textContent = 'Dark Mode';
+            }
+        }
+
+        // Mock API (replace with real endpoints)
+        const API = {
+            requestVoterId: () => {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        const randomId = 'VID-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                        resolve({ voterId: randomId });
+                    }, 800);
+                });
+            },
+
+            validateVoterId: (voterId) => {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        if (voterId && voterId.startsWith('VID-')) {
+                            resolve({
+                                valid: true,
+                                expiresAt: Date.now() + 7 * 60 * 1000
+                            });
+                        } else {
+                            reject({ error: 'Invalid voter ID. Please check and try again.' });
+                        }
+                    }, 1000);
+                });
+            },
+
+            submitVote: (selections) => {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        // 95% success rate for demo
+                        if (Math.random() > 0.05) {
+                            resolve({ success: true, message: '✓ Your vote has been securely recorded!' });
+                        } else {
+                            reject({ error: 'Vote could not be processed. Please try again.' });
+                        }
+                    }, 1500);
+                });
+            }
+        };
+
+        // Candidate data with high-quality Unsplash images (larger format)
+        const positions = [
+            {
+                id: 'president',
+                title: 'President',
+                candidates: [
+                    { id: 'p1', name: 'Alex Rivera', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=faces&q=80' },
+                    { id: 'p2', name: 'Jordan Lee', image: 'https://images.unsplash.com/photo-1494790108777-223d5e5b5e5d?w=300&h=300&fit=crop&crop=faces&q=80' },
+                    { id: 'p3', name: 'Samira Chen', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=faces&q=80' }
+                ]
+            },
+            {
+                id: 'vp',
+                title: 'Vice President',
+                candidates: [
+                    { id: 'vp1', name: 'Taylor Smith', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=faces&q=80' },
+                    { id: 'vp2', name: 'Morgan Kim', image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=faces&q=80' },
+                    { id: 'vp3', name: 'Casey Williams', image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=300&h=300&fit=crop&crop=faces&q=80' }
+                ]
+            },
+            {
+                id: 'treasurer',
+                title: 'Treasurer',
+                candidates: [
+                    { id: 't1', name: 'Jamie Brown', image: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=300&h=300&fit=crop&crop=faces&q=80' },
+                    { id: 't2', name: 'Pat Martinez', image: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=300&h=300&fit=crop&crop=faces&q=80' }
+                ]
+            }
+        ];
+
+        // State Management
+        const state = {
+            studentName: 'Yussuf',
+            voterId: null,
+            sessionActive: false,
+            sessionExpiresAt: null,
+            timerInterval: null,
+            selections: {},
+            voteSubmitted: false,
+            loading: false
+        };
+
+        // DOM Elements
+        const el = {
+            voteNowBtn: document.getElementById('voteNowBtn'),
+            notificationPanel: document.getElementById('notificationPanel'),
+            voterIdDisplay: document.getElementById('voterIdDisplay'),
+            copyBtn: document.getElementById('copyVoterIdBtn'),
+            activationPanel: document.getElementById('activationPanel'),
+            voterIdInput: document.getElementById('voterIdInput'),
+            activateBtn: document.getElementById('activateBtn'),
+            activationError: document.getElementById('activationError'),
+            timerBar: document.getElementById('timerBar'),
+            timerDisplay: document.getElementById('timerDisplay'),
+            votingPanel: document.getElementById('votingPanel'),
+            submitArea: document.getElementById('submitArea'),
+            submitVoteBtn: document.getElementById('submitVoteBtn'),
+            globalMessage: document.getElementById('globalMessage'),
+            studentNameSpan: document.getElementById('studentName')
+        };
+
+        // Render candidates grid with checkboxes (disabled by default)
+        function renderCandidates() {
+            let html = '';
+            positions.forEach(pos => {
+                html += `<div class="position-section" data-position-id="${pos.id}">`;
+                html += `<div class="position-title">`;
+                html += `<span>${pos.title}</span>`;
+                html += `</div>`;
+                html += `<div class="candidate-cards">`;
+
+                pos.candidates.forEach(cand => {
+                    const isSelected = state.selections[pos.id] === cand.id;
+                    const selectedClass = isSelected ? 'selected' : '';
+                    const disabledClass = !state.sessionActive ? 'disabled' : '';
+
+                    html += `
+                        <div class="candidate-card ${selectedClass} ${disabledClass}"
+                             data-position="${pos.id}"
+                             data-candidate="${cand.id}">
+                            ${!state.sessionActive ? '<div class="lock-icon">🔒</div>' : ''}
+                            <img src="${cand.image}"
+                                 alt="${cand.name}"
+                                 class="candidate-image"
+                                 loading="lazy"
+                                 onerror="this.src='https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=300&h=300&fit=crop&crop=faces&q=80'">
+                            <div class="candidate-info">
+                                <div class="candidate-name">${cand.name}</div>
+                                <div class="candidate-position">${pos.title}</div>
+                            </div>
+                            <div class="checkbox-custom">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <path d="M20 6L9 17L4 12" stroke="white" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+            });
+
+            el.votingPanel.innerHTML = html;
+
+            // Add click handlers only if session is active
+            if (state.sessionActive) {
+                document.querySelectorAll('.candidate-card:not(.disabled)').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        const positionId = card.dataset.position;
+                        const candidateId = card.dataset.candidate;
+
+                        // Toggle selection (checkbox behavior)
+                        if (state.selections[positionId] === candidateId) {
+                            delete state.selections[positionId];
+                        } else {
+                            state.selections[positionId] = candidateId;
+                        }
+
+                        // Update UI
+                        renderCandidates();
+                        renderUI();
+                    });
+                });
+            }
+        }
+
+        // Timer functions
+        function updateTimerDisplay() {
+            if (!state.sessionExpiresAt) return;
+            const now = Date.now();
+            const diff = state.sessionExpiresAt - now;
+
+            if (diff <= 0) {
+                handleTimerExpiry();
+                return;
+            }
+
+            const mins = Math.floor(diff / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+            el.timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (state.timerInterval) clearInterval(state.timerInterval);
+            state.timerInterval = setInterval(updateTimerDisplay, 500);
+        }
+
+        function stopTimer() {
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+                state.timerInterval = null;
+            }
+        }
+
+        function handleTimerExpiry() {
+            stopTimer();
+            state.sessionActive = false;
+            state.sessionExpiresAt = null;
+            state.voterId = null;
+            state.selections = {};
+            el.voterIdInput.value = '';
+            showMessage('warning', 'Your voting session has expired. Please start over.');
+            renderCandidates();
+            renderUI();
+        }
+
+        // UI Render function
+        function renderUI() {
+            // Update student name
+            el.studentNameSpan.textContent = state.studentName;
+
+            // Handle vote submitted state
+            if (state.voteSubmitted) {
+                el.voteNowBtn.disabled = true;
+                el.activateBtn.disabled = true;
+                el.submitVoteBtn.disabled = true;
+                el.voterIdInput.disabled = true;
+                el.notificationPanel.classList.add('hidden');
+                el.activationPanel.classList.add('hidden');
+                el.timerBar.classList.add('hidden');
+                el.submitArea.classList.remove('hidden');
+                return;
+            }
+
+            // Show/hide based on session state
+            if (state.sessionActive) {
+                el.timerBar.classList.remove('hidden');
+                el.submitArea.classList.remove('hidden');
+                el.activationPanel.classList.add('hidden');
+                el.notificationPanel.classList.remove('hidden');
+                el.voteNowBtn.disabled = true;
+
+                // Enable submit if all positions selected
+                const allSelected = positions.every(pos => state.selections[pos.id]);
+                el.submitVoteBtn.disabled = !allSelected || state.loading;
+            } else {
+                el.timerBar.classList.add('hidden');
+                el.submitArea.classList.add('hidden');
+            }
+
+            // Show activation panel when voterId exists but session not active
+            if (state.voterId && !state.sessionActive && !state.voteSubmitted) {
+                el.notificationPanel.classList.remove('hidden');
+                el.activationPanel.classList.remove('hidden');
+                el.voterIdDisplay.textContent = state.voterId;
+                el.activateBtn.disabled = !el.voterIdInput.value.trim() || state.loading;
+            } else if (!state.voterId && !state.sessionActive && !state.voteSubmitted) {
+                el.notificationPanel.classList.add('hidden');
+                el.activationPanel.classList.add('hidden');
+                el.voteNowBtn.disabled = false;
+            }
+
+            // Loading states
+            if (state.loading) {
+                el.voteNowBtn.disabled = true;
+                el.activateBtn.disabled = true;
+                el.submitVoteBtn.disabled = true;
+            }
+        }
+
+        // Message functions
+        function showMessage(type, text) {
+            el.globalMessage.textContent = text;
+            el.globalMessage.className = `message ${type}`;
+            el.globalMessage.classList.remove('hidden');
+        }
+
+        function clearMessage() {
+            el.globalMessage.classList.add('hidden');
+        }
+
+        // Event Handlers
+        el.voteNowBtn.addEventListener('click', async () => {
+            state.loading = true;
+            renderUI();
+            clearMessage();
+
+            try {
+                const res = await API.requestVoterId();
+                state.voterId = res.voterId;
+                state.loading = false;
+                renderUI();
+                el.voterIdInput.focus();
+            } catch (err) {
+                state.loading = false;
+                showMessage('error', 'Failed to generate voter ID. Please try again.');
+                renderUI();
+            }
+        });
+
+        el.copyBtn.addEventListener('click', () => {
+            if (state.voterId) {
+                navigator.clipboard.writeText(state.voterId).then(() => {
+                    el.copyBtn.innerHTML = '<span>✅</span> Copied!';
+                    setTimeout(() => {
+                        el.copyBtn.innerHTML = '<span>📋</span> Copy ID';
+                    }, 2000);
+                });
+            }
+        });
+
+        el.voterIdInput.addEventListener('input', () => {
+            el.activateBtn.disabled = !el.voterIdInput.value.trim() || state.loading;
+            el.activationError.classList.add('hidden');
+        });
+
+        el.activateBtn.addEventListener('click', async () => {
+            const inputId = el.voterIdInput.value.trim();
+            if (!inputId) return;
+
+            state.loading = true;
+            el.activationError.classList.add('hidden');
+            renderUI();
+
+            try {
+                const validation = await API.validateVoterId(inputId);
+                if (validation.valid) {
+                    state.sessionActive = true;
+                    state.sessionExpiresAt = validation.expiresAt;
+                    state.loading = false;
+                    renderCandidates();
+                    startTimer();
+                    renderUI();
+
+                    // Save to sessionStorage
+                    sessionStorage.setItem('votingSession', JSON.stringify({
+                        voterId: state.voterId,
+                        expiresAt: state.sessionExpiresAt,
+                        selections: state.selections
+                    }));
+                }
+            } catch (err) {
+                state.loading = false;
+                el.activationError.textContent = err.error || 'Activation failed. Please check your voter ID.';
+                el.activationError.classList.remove('hidden');
+                renderUI();
+            }
+        });
+
+        el.submitVoteBtn.addEventListener('click', async () => {
+            // Custom confirmation
+            if (!confirm('You are about to submit your vote. This action cannot be undone. Continue?')) {
+                return;
+            }
+
+            state.loading = true;
+            el.submitVoteBtn.disabled = true;
+            clearMessage();
+            renderUI();
+
+            try {
+                const result = await API.submitVote(state.selections);
+                if (result.success) {
+                    state.voteSubmitted = true;
+                    stopTimer();
+                    sessionStorage.removeItem('votingSession');
+                    showMessage('success', result.message);
+                    renderUI();
+                }
+            } catch (err) {
+                state.loading = false;
+                showMessage('error', err.error || 'Failed to submit vote. Please try again.');
+                renderUI();
+            }
+        });
+
+        // Restore session on page load
+        function restoreSession() {
+            const saved = sessionStorage.getItem('votingSession');
+            if (saved) {
+                try {
+                    const { voterId, expiresAt, selections } = JSON.parse(saved);
+                    if (expiresAt > Date.now()) {
+                        state.voterId = voterId;
+                        state.sessionActive = true;
+                        state.sessionExpiresAt = expiresAt;
+                        state.selections = selections || {};
+                        renderCandidates();
+                        startTimer();
+                        renderUI();
+                    } else {
+                        sessionStorage.removeItem('votingSession');
+                    }
+                } catch (e) {
+                    sessionStorage.removeItem('votingSession');
+                }
+            }
+        }
+
+        // Initialize
+        renderCandidates();
+        restoreSession();
+        renderUI();
+    })();
+</script>
+</body>
+</html>

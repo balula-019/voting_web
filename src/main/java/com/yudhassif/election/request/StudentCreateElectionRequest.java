@@ -1,5 +1,6 @@
 package com.yudhassif.election.request;
 import com.yudhassif.election.entity.Semester;
+import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotNull;
@@ -22,8 +23,10 @@ public class StudentCreateElectionRequest {
     private String academicYear; // 2024/2025
     @Enumerated(EnumType.STRING)
     private Semester semester;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    @Column(nullable = false)
+    private Instant startTime;
+    @Column(nullable = false)
+    private Instant endTime;
 
 }
 // election_name, Description, Academic Year, Semester(firstSemester,secondsemester), time of voting start, time of voting end

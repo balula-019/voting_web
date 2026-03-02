@@ -1,17 +1,18 @@
 package com.yudhassif.election.services;
 import com.yudhassif.election.Student.StudentRepository;
+import com.yudhassif.election.candidates.Position;
 import com.yudhassif.election.entity.*;
 import com.yudhassif.election.exception.CourseNotFoundException;
 import com.yudhassif.election.exception.DepartmentNotFoundException;
 import com.yudhassif.election.exception.StudentNotFoundException;
+import com.yudhassif.election.mapper.PositionMapper;
 import com.yudhassif.election.profile.response.AdminDashboardResponse;
 import com.yudhassif.election.profile.response.StudentDashboardResponse;
-import com.yudhassif.election.repository.CourseRepository;
-import com.yudhassif.election.repository.DepartmentRepository;
-import com.yudhassif.election.repository.ElectionRepository;
-import com.yudhassif.election.repository.UserRepository;
+import com.yudhassif.election.repository.*;
+import com.yudhassif.election.request.CreatePositionRequest;
 import com.yudhassif.election.request.StudentCreateRequest;
 import com.yudhassif.election.response.ImportResultResponse;
+import com.yudhassif.election.response.PositionResponse;
 import com.yudhassif.election.role.Role;
 import com.yudhassif.election.role.RoleRepository;
 import com.yudhassif.election.token.ActivationToken;
@@ -23,6 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.util.StringUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.management.relation.RoleNotFoundException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 
@@ -50,6 +55,8 @@ public class StudentService {
     private final EmailService emailService;
     private final TokenHasher tokenHasher;
     private final ActivationTokenRepository activationTokenRepository;
+    private final PositionRepository positionRepository;
+    private final PositionMapper mapper;
 //    @PersistenceContext
 //    private EntityManager entityManager;
     // done
@@ -479,17 +486,6 @@ public ImportResultResponse importStudentsFromExcel(MultipartFile file) {
 
 //
 //
-//        public StudentDashboardResponse buildStudentDashboard(UserDetails user) {
-//            Student student = studentRepository.findByEmail(user.getUsername())
-//                    .orElseThrow(() ->
-//                            new UsernameNotFoundException("Student not found"));
-//
-//            return new StudentDashboardResponse(
-//                    student.getFirstName() + " " + student.getLastName(),
-//                    student.getRegNumber()
-//            );
-//        }
-
 public AdminDashboardResponse buildAdminDashboard(UserDetails user) {
 
     // 🔹 Load admin from DB
@@ -519,7 +515,97 @@ public AdminDashboardResponse buildAdminDashboard(UserDetails user) {
                     .stream()
                     .anyMatch(a -> a.getAuthority().equals(role));
         }
+
+    public PositionResponse createPosition(CreatePositionRequest request) {
+        Election election = electionRepository.findById(request.getElectionId())
+                .orElseThrow(() -> new RuntimeException("Election not found"));
+
+        // Optional: check for duplicate position in same election
+        if (positionRepository.existsByNameAndElectionId(request.getName(), request.getElectionId())) {
+            throw new RuntimeException("Position already exists for this election");
+        }
+
+        Position position = Position.builder()
+                .name(request.getName())
+                .election(election)
+                .build();
+
+        Position saved = positionRepository.save(position);
+
+        // Map to DTO and return
+        return mapper.toPositionResponse(saved);
+}
+
+    @Transactional    // not tested properly  //todo test properly
+    public String resendActivationToken(String identifier) {
+
+        // 1️⃣ Find user by email OR student mail
+        User user = userRepository
+                .findByIdentifier(identifier)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // 2️⃣ Check already activated
+        if (user.isEnabled()) {
+            throw new IllegalStateException("Account already activated");
+        }
+
+        // 3️⃣ Block admin activation
+        if (user.getRole().getName().equals("ADMIN")) {
+            throw new IllegalStateException("Admin cannot activate this way");
+        }
+
+        // 4️⃣ Invalidate previous tokens
+        activationTokenRepository.invalidateAllActiveTokens(user);
+
+        // 5️⃣ Generate new token
+        String newTokenValue = UUID.randomUUID().toString();
+
+        ActivationToken newToken = ActivationToken.builder()
+                .token(newTokenValue)
+                .user(user)
+                .expiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
+                .used(false)
+                .build();
+
+        // 6️⃣ Save token
+        activationTokenRepository.save(newToken);
+
+        // 7️⃣ Return token (DEV)
+        return newTokenValue;
+
+        // PRODUCTION
+        // emailService.sendActivationLink(user.getEmail(), newTokenValue);
     }
+//
+//    public Student getAuthenticatedStudent() {
+//        return null;
+//    }
+
+    public User getAuthenticatedStudent() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        // 1 check authentication exists
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+        // 2 get username (email or student number)
+        String username = authentication.getName();
+        // 3 load student from database
+        return userRepository.findByIdentifier(username)
+                .orElseThrow(() ->
+                        new RuntimeException("Authenticated student not found"));
+    }
+
+
+
+//    public String resendActivationToken(String email) {
+//                return null;
+//    }
+}
 
 
 

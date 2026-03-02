@@ -1,10 +1,14 @@
 package com.yudhassif.election.api;
 import com.yudhassif.election.entity.Election;
+import com.yudhassif.election.entity.User;
 import com.yudhassif.election.profile.response.AdminDashboardResponse;
+import com.yudhassif.election.request.CreatePositionRequest;
+import com.yudhassif.election.request.RejectRequest;
 import com.yudhassif.election.request.StudentCreateElectionRequest;
 import com.yudhassif.election.request.StudentCreateRequest;
 import com.yudhassif.election.response.ElectionResponse;
 import com.yudhassif.election.response.ImportResultResponse;
+import com.yudhassif.election.response.PositionResponse;
 import com.yudhassif.election.response.StudentResponse;
 import com.yudhassif.election.services.ElectionService;
 import com.yudhassif.election.services.StudentService;
@@ -157,10 +161,33 @@ public ResponseEntity<ImportResultResponse> importStudents(
     ) {
         return ResponseEntity.ok(studentService.buildAdminDashboard(user));
     }
+    @PostMapping("/create-position")
+    public ResponseEntity<PositionResponse> createPosition(@Valid @RequestBody CreatePositionRequest request) {
+        PositionResponse position = studentService.createPosition(request);
+        return ResponseEntity.ok(position);
+    }
+    @PreAuthorize("hasAuthority('CANDIDATE_ASSIGN')")
+    @PutMapping("/applications/{id}/approve")
+    public ResponseEntity<Void> approve(@PathVariable Long id,
+                                        @AuthenticationPrincipal User admin) {
+        service.approveApplication(id, admin.getId());
+        return ResponseEntity.ok().build();
+    }
+
+
+    @PreAuthorize("hasAuthority('CANDIDATE_ASSIGN')")
+    @PutMapping("/applications/{id}/reject")
+    public ResponseEntity<Void> reject(@PathVariable Long id,
+                                       @RequestBody RejectRequest request,
+                                       @AuthenticationPrincipal User admin) {
+        service.rejectApplication(id, admin.getId(), request.reason());
+        return ResponseEntity.ok().build();
+    }
 
 
 
 
+// todo resend activation token for each user if its expired
 }
 
 

@@ -39,6 +39,9 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private boolean enabled;
+    // we link to student to user
+    @OneToOne(mappedBy = "user") // links to Student.user
+    private Student student;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")

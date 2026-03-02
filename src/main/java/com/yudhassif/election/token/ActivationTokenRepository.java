@@ -1,6 +1,9 @@
 package com.yudhassif.election.token;
 
+import com.yudhassif.election.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -23,4 +26,15 @@ public interface ActivationTokenRepository extends JpaRepository<ActivationToken
     Optional<ActivationToken> findByToken( String token);
 
     Optional<ActivationToken> findAllByUsedFalseAndExpiresAtAfter(Instant now);
+
+    Optional<ActivationToken> findByUserAndUsedFalse(User user);
+
+    @Modifying
+    @Query("""
+       update ActivationToken t
+       set t.used = true
+       where t.user = :user and t.used = false
+       """)
+    void invalidateAllActiveTokens(User user);
+
 }

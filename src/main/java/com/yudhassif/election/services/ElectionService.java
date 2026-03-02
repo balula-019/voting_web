@@ -1,13 +1,13 @@
 package com.yudhassif.election.services;
 import com.yudhassif.election.Student.StudentRepository;
-import com.yudhassif.election.entity.Election;
-import com.yudhassif.election.entity.ElectionStatus;
-import com.yudhassif.election.entity.Student;
+import com.yudhassif.election.candidates.Leader;
+import com.yudhassif.election.candidates.Position;
+import com.yudhassif.election.entity.*;
+import com.yudhassif.election.exception.BusinessException;
 import com.yudhassif.election.exception.ElectionNotFoundException;
-import com.yudhassif.election.exception.StudentNotFoundException;
 import com.yudhassif.election.mapper.ElectionMapper;
 import com.yudhassif.election.mapper.StudentMapper;
-import com.yudhassif.election.repository.ElectionRepository;
+import com.yudhassif.election.repository.*;
 import com.yudhassif.election.request.StudentCreateElectionRequest;
 import com.yudhassif.election.response.ElectionResponse;
 import com.yudhassif.election.response.StudentResponse;
@@ -15,8 +15,12 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.util.StringUtil;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +33,11 @@ public class ElectionService {
     private final StudentMapper studentMapper;
     private final StudentRepository studentRepository;
     private final ElectionRepository electionRepository;
+    private final CandidateApplicationRepository candidateApplicationRepository;
+    private final PositionRepository positionRepository;
+    private final LeaderRepository leaderRepository;
+    private final Clock clock;
+    private final VotingCredentialRepository votingCredentialRepository;
 
     public void createStudentElection(StudentCreateElectionRequest request) {
 // optional
@@ -63,20 +72,45 @@ public class ElectionService {
 
         electionRepository.save(election);
     }
+//    public void createStudentElection(StudentCreateElectionRequest request) {
+//
+//        if (request.getStartTime() == null || request.getEndTime() == null) {
+//            throw new IllegalArgumentException("Start time and End time must not be null");
+//        }
+//
+//        if (request.getStartTime().isAfter(request.getEndTime())) {
+//            throw new IllegalArgumentException("Voting start time must be before end time");
+//        }
+//
+//        ElectionStatus status =
+//                determineStatus(request.getStartTime(), request.getEndTime());
+//
+//        Election election = Election.builder()
+//                .electionName(request.getElectionName())
+//                .description(request.getDescription())
+//                .academicYear(request.getAcademicYear())
+//                .semester(request.getSemester())
+//                .votingStartTime(request.getStartTime())
+//                .votingEndTime(request.getEndTime())
+//                .status(status) // ⭐ dynamically determined
+//                .build();
+//
+//        electionRepository.save(election);
+//    }
 
-//    private ElectionStatus determineStatus(
-//            LocalDateTime start,
-//            LocalDateTime end
-//    ) {
-//        LocalDateTime now = LocalDateTime.now();
+//    private ElectionStatus determineStatus(Instant start, Instant end) {
+//
+//        Instant now = Instant.now(clock);
 //
 //        if (now.isBefore(start)) {
 //            return ElectionStatus.PENDING;
-//        } else if (now.isAfter(end)) {
-//            return ElectionStatus.CLOSED;
-//        } else {
-//            return ElectionStatus.ACTIVE;
 //        }
+//
+//        if (now.isAfter(end)) {
+//            return ElectionStatus.CLOSED;
+//        }
+//
+//        return ElectionStatus.ACTIVE;
 //    }
     // Prevents voting when status is not active
     public void vote(Long electionId) {
@@ -101,8 +135,7 @@ public class ElectionService {
 //    @Scheduled(fixedDelay = 10000)// touches only active and pending other authorities like resume and suspending is for admin
 //    @org.springframework.transaction.annotation.Transactional(readOnly = true)
 //    public void updateElectionStatus() {
-//        LocalDateTime now = LocalDateTime.now(ZoneId.of("Africa/Dar_es_Salaam")); // i will remove after testing
-////        Instant now = Instant.now();
+//        Instant now = Instant.now(clock);
 //
 //        // 1️⃣ START elections automatically
 //        electionRepository.findByStatus(ElectionStatus.PENDING)
@@ -122,7 +155,20 @@ public class ElectionService {
 //                    }
 //                });
 //    }
+    @Scheduled(fixedDelay = 10000) // Runs every 10 seconds
+    @Transactional
+    public void updateElectionStatuses() {
+        Instant now = Instant.now(clock);
 
+        System.out.println("------------: " + now);
+
+        int activated = electionRepository.activatePendingElections(now);
+        int closed = electionRepository.closeActiveElections(now);
+
+        if (activated > 0 || closed > 0) {
+            System.out.println("Election Update: Activated " + activated + ", Closed " + closed);
+        }
+    }
 // logic for admin to close the election
 
     public void closeElection(Long electionId) {
@@ -291,6 +337,123 @@ public StudentResponse findStudentByRegistrationNumber(String regNumber) {
 Student student = studentRepository.findByFirstNameAndLastName(firstName,lastName);
 
         return studentMapper.toStudentResponse(student);
+    }
+
+    @Transactional
+    public void approveApplication(Long applicationId, Long adminId) {
+
+        // 1️⃣ Get application
+        CandidateApplication application = candidateApplicationRepository.findById(applicationId)
+                .orElseThrow(() -> new BusinessException("Application not found"));
+
+        // 2️⃣ Ensure still pending
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            throw new BusinessException("Application already processed");
+        }
+
+        // 3️⃣ Ensure election still valid
+        Election election = application.getElection();
+
+//        if (election.getEndTime().isBefore(LocalDateTime.now())) {
+//            throw new BusinessException("Election already ended");
+//        }
+//
+//        // (Optional) ensure election open
+//        if (!election.isElectionOpen()) {
+//            throw new BusinessException("Election not open");
+//        }
+
+        // 4️⃣ Validate position
+        Position position = application.getPosition();
+
+        // Optional: limit number of candidates per position
+        int approvedCount = candidateApplicationRepository.countApprovedByPositionId(position.getId());
+
+        if (approvedCount > 4) { // example max candidates allowed
+            throw new BusinessException("Candidate limit reached for this position");
+        }
+
+        // 5️⃣ Mark application approved
+        application.setStatus(ApplicationStatus.APPROVED);
+        application.setReviewedAt(LocalDateTime.now());
+        application.setReviewedBy(adminId);
+
+        candidateApplicationRepository.save(application);
+
+        // 6️⃣ Create leader (candidate visible to voters)
+        Leader leader = Leader.builder()
+                .student(application.getStudent())
+                .position(position)
+                .election(election)
+                .gpa(application.getGpa())
+                .imageUrl(application.getCampaignImageUrl())
+                .manifesto(application.getManifesto())
+                .approvedAt(LocalDateTime.now())
+                .status(ApplicationStatus.APPROVED)
+                .build();
+
+        leaderRepository.save(leader);
+    }
+    @Transactional
+//    public void rejectApplication(Long applicationId, Long adminId, String reason) {
+//
+//        CandidateApplication application = candidateApplicationRepository.findById(applicationId)
+//                .orElseThrow(() -> new BusinessException("Application not found"));
+//
+//        if (application.getStatus() != ApplicationStatus.PENDING) {
+//            throw new BusinessException("Application already processed");
+//        }
+//
+//
+//        application.setStatus(ApplicationStatus.REJECTED);
+//        application.setReviewedAt(LocalDateTime.now());
+//        application.setReviewedBy(adminId);
+//        application.setRejectionReason(reason);
+//
+//        candidateApplicationRepository.save(application);
+//    }
+    public void rejectApplication(Long applicationId, Long adminId, String reason) {
+
+        CandidateApplication application = candidateApplicationRepository.findById(applicationId)
+                .orElseThrow(() -> new BusinessException("Application not found"));
+
+        // prevent rejecting again if already rejected (optional)
+        if (application.getStatus() == ApplicationStatus.REJECTED) {
+            throw new BusinessException("Application already rejected");
+        }
+
+        application.setStatus(ApplicationStatus.REJECTED);
+        application.setReviewedAt(LocalDateTime.now());
+        application.setReviewedBy(adminId);
+        application.setRejectionReason(reason);
+
+        candidateApplicationRepository.save(application);
+    }
+
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Election getActiveElectionById(Long electionId) {
+
+        Election election = electionRepository.findById(electionId)
+                .orElseThrow(() -> new RuntimeException("Election not found"));
+
+        Instant now = Instant.now(clock);
+
+        // HARD TIME VALIDATION (source of truth)
+        boolean withinWindow =
+                !now.isBefore(election.getVotingStartTime()) &&
+                        !now.isAfter(election.getVotingEndTime());
+
+//        if (!withinWindow) {
+//            throw new IllegalStateException("Election is not in voting window");
+//        }
+
+        // STATUS VALIDATION (business lifecycle)
+        if (election.getStatus() != ElectionStatus.ACTIVE) {
+            throw new IllegalStateException("Election is not active");
+        }
+
+        return election;
     }
 }
 
