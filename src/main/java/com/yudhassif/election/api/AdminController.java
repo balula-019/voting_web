@@ -188,6 +188,10 @@ public ResponseEntity<ImportResultResponse> importStudents(
 
 
 // todo resend activation token for each user if its expired
+    // todo to test how student elect their leader
+    // todo to logOut for admin and student
+    // todo to to implement the permission for student  to view live results
+    // todo to Announce  winner after 20 minute after election
 }
 
 
